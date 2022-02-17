@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Dijkstra's Algorithm</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="../../../../styles.css">
+        <link href="https://fonts.googleapis.com/css?family=Montserrat:500&display=swap" rel="stylesheet">
+    </head>
+    <body>
+        <header>
+            <!--<a class="logo" href="/"><img src="images/logo.svg" alt="logo"></a>-->
+            <nav>
+                <ul class="nav__links">
+                    <li><a href="../../../../index.html">Home</a></li>
+                    <li><a href="../../algorithms.html">Algorithms</a></li>
+                    <li><a href="../../../Data Structures/data-structures.html">Data Structures</a></li>
+                </ul>
+            </nav>
+            <a class="cta" href="#">Contact</a>
+            <p class="menu cta">Menu</p>
+        </header>
+        <div class="overlay">
+            <a class="close">&times;</a>
+            <div class="overlay__content">
+                <a href="../../../../index.html">Home</a>
+                <a href="./algorithms.html">Algorithms</a>
+                <a href="../../../Data Structures/data-structures.html">Data Structures</a>
+            </div>
+        </div>
+        <!--End of navigation-->
+        <div class="dijkstra-page-div">
+            <div>
+                <h1>
+                    Dijkstra's Algorithm
+                </h1>
+            </div>
+
+            <p>
+                Dijkstra's algorithm is an algorithm which solves the single source shortest path problem in a weighted directed graph. Given a source node, it is able to find the shortest path to every other node in the graph.
+            </p>
+
+            <h2>
+                Pseudocode
+            </h2>
+    
+            <div id="dijkstra-grid">
+            </div>
+            <div class="dijkstra-buttons-div">
+                <button id="reset-button" class="dijkstra-button cta">
+                    <p>Reset</p>
+                </button>
+                <button id="visualise-button" class="dijkstra-button cta">
+                    <p>Visualise</p>
+                </button>
+            </div>
+        </div>
+    </body>
+    <script type="text/javascript" src="./dijkstra.js" defer></script>
+</html>
