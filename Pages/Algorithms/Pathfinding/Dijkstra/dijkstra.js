@@ -166,7 +166,7 @@ while (i<1000) {
     const div = document.createElement('div');
     div.id = `dijkstra-node-${i}`;
     div.className = 'dijkstra-node';
-    div.textContent = `${i}`;
+    //div.textContent = `${i}`;
     div.node = new HeapNode(Infinity, {
         isFinish: false,
         isStart: false,
@@ -181,14 +181,21 @@ while (i<1000) {
     div.onmouseup = () => {
         isClicking = false
     }
+    /*
+    div.ondblclick = () => {
+        div.node.object.weight = 100;
+    }
+    */
     div.onmouseenter = () => {
         if(isClicking === true && isSelectingStart === false && isSelectingFinish === false) {
-            if(div.classList.contains("dijkstra-node-wall")) {
-                div.classList.remove("dijkstra-node-wall");
-                div.node.object.isWall = false;
-            } else {
-                div.classList.add("dijkstra-node-wall");
-                div.node.object.isWall = true;
+            if(!div.classList.contains("dijkstra-node-start") && !div.classList.contains("dijkstra-node-finish")) {
+                if(div.classList.contains("dijkstra-node-wall")) {
+                    div.classList.remove("dijkstra-node-wall");
+                    div.node.object.isWall = false;
+                } else {
+                    div.classList.add("dijkstra-node-wall");
+                    div.node.object.isWall = true;
+                }
             }
         }
     };
@@ -223,13 +230,11 @@ dijkstraNodes.forEach((dijkstraNode, nodeIndx) => {
                 dijkstraNode.classList.remove("dijkstra-node-wall");
                 dijkstraNode.node.object.isWall = false;
             }
-            console.log(dijkstraNode.node.object.coordinate);
         } else {
             if(dijkstraNode.node.object.isStart === false && dijkstraNode.node.object.isFinish === false) {
             dijkstraNode.classList.add("dijkstra-node-wall");
             dijkstraNode.node.object.isWall = true;
             }
-            console.log(dijkstraNode.node);
         }
     })
 });
@@ -349,35 +354,37 @@ function dijkstra() {
     //Initialise the min-heap
     initialiseHeap();
     //We loop as long as we have unvisited nodes
+    let itr = 0;
     while(dijkstraUnvisitedHeap.length() > 0) {
         let closestNode = dijkstraUnvisitedHeap.removeRoot();
         if(closestNode.key === Infinity) {
-            console.log("Iteration stopped due to infinity")
-            console.log(dijkstraUnvisitedHeap.nodes);
             return dijkstraVisitedArray;
         } 
         //The continue keyword ends one iteration of the loop. Essentially, if the closest node is a wall, we start again with a smaller array since we have shifted the array
         if(closestNode.object.isWall === true) {
-            console.log("isWall so continuing");
+            itr++;
             continue;
         } 
         //If we are surrounded/ there is no path for us to take, return the computed path as there is no path possible
         if(closestNode.key === Infinity) {
-            console.log("Iteration stopped due to infinity")
-            console.log(dijkstraUnvisitedHeap.nodes);
             return dijkstraVisitedArray;
         } 
         updateUnvisitedNeighbours(closestNode);
         dijkstraVisitedArray.push(closestNode);
-        closestNode.object.isVisited = true;
-        if(!dijkstraNodes[closestNode.object.coordinate].classList.contains("dijkstra-node-start") && !dijkstraNodes[closestNode.object.coordinate].classList.contains("dijkstra-node-finish")) {
-            dijkstraNodes[closestNode.object.coordinate].classList.add("dijkstra-node-visited");
-            dijkstraNodes[closestNode.object.coordinate].node.object.isVisited = true;
-        }
+        setTimeout(() => {
+            closestNode.object.isVisited = true;
+            if(closestNode.object.coordinate === finishNodeIndex) {
+                animateShortestPath();
+            }
+            if(!dijkstraNodes[closestNode.object.coordinate].classList.contains("dijkstra-node-start") && !dijkstraNodes[closestNode.object.coordinate].classList.contains("dijkstra-node-finish")) {
+                dijkstraNodes[closestNode.object.coordinate].classList.add("dijkstra-node-visited");
+                dijkstraNodes[closestNode.object.coordinate].node.object.isVisited = true;
+            }
+        }, 5 * itr);
         if(closestNode.object.coordinate === finishNodeIndex) {
-            console.log("Iteration stopped due to hitting target")
             return dijkstraVisitedArray;
         }
+        itr++;
     }
 }
 
@@ -429,6 +436,7 @@ function updateUnvisitedNeighbours(node) {
             replacement.previousNode = node;
             dijkstraUnvisitedHeap.replace(neighbour, replacement);
             dijkstraNodes[neighbour.object.coordinate].node.key = replacement.key;
+            dijkstraNodes[neighbour.object.coordinate].node.previousNode = node;
         }
     }
 }
@@ -449,10 +457,24 @@ function initialiseHeap() {
 
 function getNodesInShortestPathOrder() {
     const nodesInShortestPathOrder = [];
-    let currentNode = dijkstraNodes[finishNodeIndex];
-    while (currentNode != null) {
+    let currentNode = dijkstraNodes[finishNodeIndex].node;
+    while (currentNode != undefined) {
         nodesInShortestPathOrder.unshift(currentNode);
         currentNode = currentNode.previousNode;
     }
     return nodesInShortestPathOrder;
+}
+
+function animateShortestPath() {
+    const nodesInShortestPathOrder = getNodesInShortestPathOrder();
+    for(let i = 0; i < nodesInShortestPathOrder.length; i++) {
+        setTimeout(() => {
+            const currentNode = nodesInShortestPathOrder[nodesInShortestPathOrder.length - 1 - i]
+            const coordinate = currentNode.object.coordinate;
+            
+            if(!dijkstraNodes[coordinate].classList.contains("dijkstra-node-start") && !dijkstraNodes[coordinate].classList.contains("dijkstra-node-finish")) {
+                dijkstraNodes[coordinate].classList.add("dijkstra-node-shortest-path");
+            }
+        }, 100 * i)
+    }
 }
