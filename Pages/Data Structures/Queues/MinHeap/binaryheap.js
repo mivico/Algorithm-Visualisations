@@ -5,6 +5,7 @@ class HeapNode {
     }
 }
 
+
 class BinaryHeap {
     constructor(array, orderCriteria) {
 
@@ -19,7 +20,7 @@ class BinaryHeap {
         };
         this.length = () => {
             return this.nodes.length;
-        };
+        }
         this.parentIndex = (index) => {
             return Math.floor((index - 1) / 2);
         };
@@ -36,11 +37,12 @@ class BinaryHeap {
             this.nodes.push(value);
             this.shiftUp(this.length() - 1);
         };
-        this.replace = (i, value) => {
-            if (i >= this.length()) {
+        this.replace = (oldNode, value) => {
+            if (this.index(oldNode) === undefined) {
                 return;
             }
-            this.remove(i);
+            
+            this.removeWithoutIndex(oldNode);
             this.insert(value);
         };
         this.swapAt = (first, second) => {
@@ -128,21 +130,3 @@ class BinaryHeap {
     }
     
 }
-
-var testNode1 = new HeapNode(20, "foo");
-var testNode2 = new HeapNode(24, "bar");
-var testNode3 = new HeapNode(2, "fooper");
-var testNode4 = new HeapNode(1, "oonts");
-var testNode5 = new HeapNode(0, "new");
-var testNode6 = new HeapNode(192, "kablam");
-
-var testHeap = new BinaryHeap([testNode1, testNode2,testNode3,testNode4], (lhs, rhs) => {
-    if(lhs.key < rhs.key) {
-        return true;
-    } else {
-        return false;
-    }
-});
-
-testHeap.replace(1, testNode6);
-console.log(testHeap);

@@ -2,10 +2,11 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>Dijkstra's Algorithm</title>
+        <title>Pathfinding Algorithms</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="../../../../styles.css">
+        <link rel="stylesheet" href="../../../styles.css">
+        <link rel="stylesheet" href="./pathfinding.css">
         <link href="https://fonts.googleapis.com/css?family=Montserrat:500&display=swap" rel="stylesheet">
     </head>
     <body>
@@ -30,7 +31,7 @@
             </div>
         </div>
         <!--End of navigation-->
-        <div class="dijkstra-page-div">
+        <div class="pathfinding-page-div">
             <div>
                 <h1>
                     Dijkstra's Algorithm
@@ -45,17 +46,19 @@
                 Pseudocode
             </h2>
     
-            <div id="dijkstra-grid">
+            <div id="pathfinding-grid">
             </div>
-            <div class="dijkstra-buttons-div">
-                <button id="reset-button" class="dijkstra-button cta">
+            <div class="pathfinding-buttons-div">
+                <button id="reset-button" class="pathfinding-button cta">
                     <p>Reset</p>
                 </button>
-                <button id="visualise-button" class="dijkstra-button cta">
+                <button id="visualise-button" class="pathfinding-button cta">
                     <p>Visualise</p>
                 </button>
             </div>
         </div>
     </body>
-    <script type="text/javascript" src="./dijkstra.js" defer></script>
+    <script type="text/javascript" src="../../../index.js" defer></script>
+    <script type="text/javascript" src="../../Data Structures/Queues/MinHeap/binaryheap.js" defer></script>
+    <script type="text/javascript" src="./pathfinding.js" defer></script>
 </html>
