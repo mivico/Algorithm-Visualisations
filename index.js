@@ -9,3 +9,7 @@ menuOpen.addEventListener("click", () => {
 menuClose.addEventListener("click", () => {
   overlay.classList.remove("overlay--active");
 });
+
+function getRandomArbitrary(min, max) {
+  return Math.random() * (max - min) + min;
+}
