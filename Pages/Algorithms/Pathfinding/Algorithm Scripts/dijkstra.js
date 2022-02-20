@@ -1,5 +1,6 @@
 //Dijkstra logic
 function dijkstra() {
+    IS_VISUALISING = true;
     // At the start, all nodes have already been initialised to infinity
     //Just as in dijkstra's algorithm, we first set the start node to a distane of 0.
     GRID_NODES[START_NODE_INDEX].node.key = 0;

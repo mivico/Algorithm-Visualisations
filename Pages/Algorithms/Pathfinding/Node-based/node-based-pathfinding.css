@@ -1,0 +1,11 @@
+/** Reset */
+body,
+canvas {
+  margin: 0px;
+  padding: 0px;
+}
+canvas {
+  background-color: white;
+  height: 100vh;
+  width: 100vw;
+}

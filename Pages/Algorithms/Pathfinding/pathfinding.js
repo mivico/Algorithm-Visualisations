@@ -3,6 +3,7 @@ let GRID_ROWS = 31;
 const BORDER_COLOR = "1px solid rgba(50, 50, 150, 0.4)"
 var IS_DRAGGING_START = false;
 var IS_DRAGGING_FINISH = false;
+var IS_VISUALISING = false;
 var IS_VISUALISED = false;
 var IS_CLICKING = false;
 var START_NODE_INDEX = null;
@@ -79,7 +80,9 @@ const GRID_NODES = document.querySelectorAll(".node");
 //Reset button logic
 const resetButton = document.getElementById("reset-button");
 resetButton.addEventListener("click", () => {
-    reset();
+    if(!IS_VISUALISING) {
+        reset();
+    }
 });
 
 function reset() {
@@ -382,6 +385,7 @@ function animateShortestPath() {
                         GRID_NODES[coordinate].classList.add("node-shortest-path");
                     }
                     if(i == nodesInShortestPathOrder.length - 1) {
+                        IS_VISUALISING = false;
                         IS_VISUALISED = true;
                     }
                 }
@@ -394,5 +398,6 @@ function revisualise(coordinate) {
     if(IS_VISUALISED) {
         resetForRevisualisation()
         CURRENT_ALGORITHM();
+        IS_VISUALISING = false;
     }
 }
