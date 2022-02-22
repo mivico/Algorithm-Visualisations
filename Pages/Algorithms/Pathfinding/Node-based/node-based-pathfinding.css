@@ -4,8 +4,34 @@ canvas {
   margin: 0px;
   padding: 0px;
 }
-canvas {
+
+#canvas-holder {
+  width: 80%;
+  height: 800px;
+  align-items: center;
+  display: flex;
+  margin: auto;
   background-color: white;
-  height: 100vh;
-  width: 100vw;
+  outline: 1px solid black;
+}
+
+.pathfinding-button {
+  padding: 9px 25px;
+  background-color: rgba(0, 136, 169, 1);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: background-color 0.3s ease 0s;
+  margin-bottom: 50px;
+}
+
+.pathfinding-button p {
+  color: white;
+  margin: 0px auto;
+  font-size: large;
+}
+
+.pathfinding-buttons-div {
+  margin-top: 50px;
 }

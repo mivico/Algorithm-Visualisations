@@ -6,15 +6,51 @@
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="../../../../styles.css">
-        <link rel="stylesheet" href="../pathfinding.css">
         <link rel="stylesheet" href="./node-based-pathfinding.css">
         <link href="https://fonts.googleapis.com/css?family=Montserrat:500&display=swap" rel="stylesheet">
     </head>
     <body>
-        <canvas></canvas>
+        <header>
+          <!--<a class="logo" href="/"><img src="images/logo.svg" alt="logo"></a>-->
+            <nav>
+                <ul class="nav__links">
+                    <li><a href="../../../../index.html">Home</a></li>
+                    <li><a href="../../algorithms.html">Algorithms</a></li>
+                    <li><a href="../../../Data Structures/data-structures.html">Data Structures</a></li>
+                </ul>
+            </nav>
+            <a class="cta" href="#">Contact</a>
+            <p class="menu cta">Menu</p>
+        </header>
+        <div class="overlay">
+            <a class="close">&times;</a>
+            <div class="overlay__content">
+                <a href="../../../../index.html">Home</a>
+                <a href="../../algorithms.html">Algorithms</a>
+                <a href="../../../Data Structures/data-structures.html">Data Structures</a>
+            </div>
+        </div>
+        <div id="canvas-holder">
+            <canvas></canvas>
+        </div>
+        <div class="pathfinding-buttons-div">
+            <button id="reset-button" class="pathfinding-button cta">
+                <p>Reset</p>
+            </button>
+            <button id="visualise-dijkstra" class="pathfinding-button cta">
+                <p>Dijkstra</p>
+            </button>
+            <button id="visualise-astar" class="pathfinding-button cta">
+                <p>A-Star</p>
+            </button>
+        </div>
     </body>
     <script type="text/javascript" src="../../../Data Structures/Queues/MinHeap/binaryheap.js" defer></script>
     <script type="text/javascript" src="./Canvas Classes/classes.js" defer></script>
+    <script type="text/javascript" src="../../../Data Structures/Linked List/linked-list.js" defer></script>
+    <script type="text/javascript" src="../../../Data Structures/Graph/vertex.js" defer></script>
+    <script type="text/javascript" src="../../../Data Structures/Graph/edge.js" defer></script>
+    <script type="text/javascript" src="../../../Data Structures/Graph/adjacency-list.js" defer></script>
     <script type="text/javascript" src="./node-based-pathfinding.js" defer></script>
 
 </html>
