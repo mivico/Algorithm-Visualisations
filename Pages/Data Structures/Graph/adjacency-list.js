@@ -7,7 +7,6 @@ class EdgeList {
             var found = false;
             for (let i = 0; i < this.edges.length; i++) {
                 const temp = this.edges[i];
-                console.log(temp)
                 if (temp.from.index === edge.from.index && temp.to.index === edge.to.index) {
                     found = true;
                     break;
@@ -25,6 +24,7 @@ class AdjacencyList {
         //This is an array of edgelists ^^^
         this.adjacencyList = [];
         this.vertices = [];
+        this.triangles = [];
 
         this.edges = () => {
             var allEdges = [];
@@ -48,6 +48,10 @@ class AdjacencyList {
                 this.vertices.push(this.adjacencyList[i].vertex);
             }
 
+        }
+
+        this.addTriangle = (triangle) => {
+            this.triangles.push(triangle);
         }
 
         this.findMatchingVertices = (object) => {
@@ -88,7 +92,8 @@ class AdjacencyList {
 
         this.addUndirectedEdge = (from, to, weight, lineObject) => {
             this.addDirectedEdge(from, to, weight, lineObject);
-            this.addDirectedEdge(to, from, weight, lineObject);
+            const tempLine = new Line(lineObject.node2, lineObject.node1, 1)
+            this.addDirectedEdge(to, from, weight, tempLine);
         }
 
         this.weightFrom = (sourceVertex, destinationVertex) => {

@@ -7,7 +7,7 @@ canvas {
 
 #canvas-holder {
   width: 80%;
-  height: 800px;
+  aspect-ratio: 16/9;
   align-items: center;
   display: flex;
   margin: auto;
@@ -34,4 +34,8 @@ canvas {
 
 .pathfinding-buttons-div {
   margin-top: 50px;
+}
+
+#westminster-img {
+  display: none;
 }

@@ -4,6 +4,11 @@ const canvasDiv = document.getElementById('canvas-holder');
 const dijkstraButton = document.getElementById('visualise-dijkstra');
 const astarButton = document.getElementById('visualise-astar');
 const resetButton = document.getElementById('reset-button');
+const westminsterButton = document.getElementById('westminster-button');
+
+var printStatement = [];
+
+var RENDER_IMAGE_SRC = undefined;
 
 canvas.width = canvasDiv.clientWidth;
 canvas.height = canvasDiv.clientHeight;
@@ -11,6 +16,11 @@ canvas.style.backgroundColor = canvasDiv.style.backgroundColor;
 
 var CANVAS_X_OFFSET = canvas.offsetLeft;
 var CANVAS_Y_OFFSET = canvas.offsetTop;
+
+var LEFT_BOUNDS = CANVAS_X_OFFSET;
+var RIGHT_BOUNDS = canvas.width;
+var TOP_BOUNDS = CANVAS_Y_OFFSET - window.scrollY;
+var BOTTOM_BOUNDS = canvas.height;
 
 var MOUSE_X = 0;
 var MOUSE_Y = 0;
@@ -24,7 +34,7 @@ var START_CLICK = 0;
 var GRAPH_ADJACENCY_LIST = new AdjacencyList();
 var UNVISITED_HEAP = new BinaryHeap([], lessThanWithHeuristic);
 
-var NODE_RADIUS = canvas.width/100;
+var NODE_RADIUS = 4;
 
 let GRID_COLS = 40;
 let GRID_ROWS = 15;
@@ -35,7 +45,9 @@ var IS_CLICKING = false;
 var START_NODE_INDEX = null;
 var FINISH_NODE_INDEX = null;
 var VISITED_ARRAY = [];
+var NODES_IN_SHORTEST_PATH_ORDER = [];
 var CURRENT_ALGORITHM = undefined;
+
 var CURRENT_SORT_CRITERIA = lessThanWithHeuristic;
 
 var IS_SELECTING_START = true;
@@ -48,13 +60,10 @@ window.onresize = () => {
     canvas.width = canvasDiv.clientWidth;
     canvas.height = canvasDiv.clientHeight;
 
-    if(canvas.width/100 > 30) {
-        NODE_RADIUS = 30;
-    } else if (canvas.width/100 < 10) {
-        NODE_RADIUS = 10;
-    } else {
-        NODE_RADIUS = canvas.width/100;
-    }
+    LEFT_BOUNDS = CANVAS_X_OFFSET;
+    RIGHT_BOUNDS = canvas.width;
+    TOP_BOUNDS = CANVAS_Y_OFFSET - window.scrollY;
+    BOTTOM_BOUNDS = canvas.height;
 }
 
 
@@ -71,21 +80,27 @@ window.onmousemove = (e) => {
         } else if (e.x - CANVAS_X_OFFSET + NODE_RADIUS > canvas.width) {
             MOUSE_X = canvas.width - NODE_RADIUS;
         }
-        if(e.y - CANVAS_Y_OFFSET - NODE_RADIUS > 0 && e.y - CANVAS_Y_OFFSET + NODE_RADIUS  < canvas.height) {
-            MOUSE_Y = e.y - CANVAS_Y_OFFSET;
-        } else if(e.y - CANVAS_Y_OFFSET - NODE_RADIUS < 0) {
-            MOUSE_Y = NODE_RADIUS;
-        } else if(e.y - CANVAS_Y_OFFSET + NODE_RADIUS  > canvas.height) {
-            MOUSE_Y = canvas.height - NODE_RADIUS;
+        if(e.y - CANVAS_Y_OFFSET - NODE_RADIUS + window.scrollY > 0 && e.y - CANVAS_Y_OFFSET + NODE_RADIUS + window.scrollY  < canvas.height) {
+            MOUSE_Y = e.y - CANVAS_Y_OFFSET + window.scrollY ;
+        } else if(e.y - CANVAS_Y_OFFSET - NODE_RADIUS + window.scrollY < 0) {
+            MOUSE_Y = NODE_RADIUS + window.scrollY ;
+        } else if(e.y - CANVAS_Y_OFFSET + NODE_RADIUS + window.scrollY > canvas.height) {
+            MOUSE_Y = canvas.height - NODE_RADIUS + window.scrollY;
         }
 
     } else {
         if(e.x - CANVAS_X_OFFSET > 0 && e.x - CANVAS_X_OFFSET < canvas.width) {
             MOUSE_X = e.x - CANVAS_X_OFFSET;
         }
-        if(e.y - CANVAS_Y_OFFSET > 0 && e.y - CANVAS_Y_OFFSET < canvas.height) {
-            MOUSE_Y = e.y - CANVAS_Y_OFFSET;
+        if(e.y - CANVAS_Y_OFFSET + window.scrollY > 0 && e.y - CANVAS_Y_OFFSET + window.scrollY < canvas.height) {
+            MOUSE_Y = e.y - CANVAS_Y_OFFSET + window.scrollY ;
         }
+    }
+
+    if(CURRENT_VERTEX_INDEX != undefined) {
+        canvasDiv.style.cursor = 'pointer'
+    } else {
+        canvasDiv.style.cursor = 'default'
     }
     
 
@@ -125,26 +140,35 @@ window.onmouseup = (e) => {
 }
 
 function isInCavas(e) {
-    return e.x - CANVAS_X_OFFSET > 0 && e.x - CANVAS_X_OFFSET < canvas.width && e.y - CANVAS_Y_OFFSET > 0 && e.y - CANVAS_Y_OFFSET < canvas.height;
+    return e.x - CANVAS_X_OFFSET > 0 && e.x - CANVAS_X_OFFSET < canvas.width && e.y - CANVAS_Y_OFFSET + window.scrollY > 0 && e.y - CANVAS_Y_OFFSET + window.scrollY < canvas.height;
 }
 
 function createVertex() {
-    //const tempCircle = new Circle(MOUSE_X, MOUSE_Y);
+    //console.log('created vertex')
     const tempCircle = new Circle(MOUSE_X/canvas.width, MOUSE_Y/canvas.height);
     const tempNode = new HeapNode(Infinity, tempCircle);
+    /*
+    if (printStatement.length%2 === 0) {
+        printStatement.push(`\n{x: ${MOUSE_X/canvas.width}, y: ${MOUSE_Y/canvas.height}}, `);
+    } else {
+        printStatement.push(`{x: ${MOUSE_X/canvas.width}, y: ${MOUSE_Y/canvas.height}},`);
+    }
+    */
+    //console.log(`{x: ${MOUSE_X/canvas.width}, y: ${MOUSE_Y/canvas.height}}, `);
     tempNode.object.draw();
     tempNode.index = GRAPH_ADJACENCY_LIST.createVertex(tempNode).index;
 }
 
 function handleMouseClick(e) {
+    console.log(GRAPH_ADJACENCY_LIST)
     if(CURRENT_VERTEX_INDEX != undefined) {
+        console.log(GRAPH_ADJACENCY_LIST.adjacencyList[CURRENT_VERTEX_INDEX].vertex.node.key);
         GRAPH_ADJACENCY_LIST.adjacencyList[CURRENT_VERTEX_INDEX].vertex.node.object.isSelected = !GRAPH_ADJACENCY_LIST.adjacencyList[CURRENT_VERTEX_INDEX].vertex.node.object.isSelected;
         handleEdgeCreation(); 
     }
     if(!IS_SELECTING && CURRENT_VERTEX_INDEX == undefined) {
         createVertex();
     }
-    console.log(GRAPH_ADJACENCY_LIST);
 }
 
 function handleMouseHold() {
@@ -190,11 +214,18 @@ function handleEdgeCreation() {
             } else {
                 //2 different nodes have been selected
                 SELECTED_NODES_INDEXES.push(CURRENT_VERTEX_INDEX);
-                const tempEdge = new Arrow(GRAPH_ADJACENCY_LIST.adjacencyList[SELECTED_NODES_INDEXES[0]].vertex.node, GRAPH_ADJACENCY_LIST.adjacencyList[SELECTED_NODES_INDEXES[1]].vertex.node, 1);
+                const distance = calculateDistance(GRAPH_ADJACENCY_LIST.adjacencyList[SELECTED_NODES_INDEXES[0]].vertex.node, GRAPH_ADJACENCY_LIST.adjacencyList[SELECTED_NODES_INDEXES[1]].vertex.node);
+                const tempEdge = new Line(GRAPH_ADJACENCY_LIST.adjacencyList[SELECTED_NODES_INDEXES[0]].vertex.node, GRAPH_ADJACENCY_LIST.adjacencyList[SELECTED_NODES_INDEXES[1]].vertex.node, distance);
                 tempEdge.draw()
                 GRAPH_ADJACENCY_LIST.adjacencyList[SELECTED_NODES_INDEXES[0]].vertex.node.object.isSelected = false;
                 GRAPH_ADJACENCY_LIST.adjacencyList[SELECTED_NODES_INDEXES[1]].vertex.node.object.isSelected = false;
-                GRAPH_ADJACENCY_LIST.addDirectedEdge(GRAPH_ADJACENCY_LIST.adjacencyList[SELECTED_NODES_INDEXES[0]].vertex, GRAPH_ADJACENCY_LIST.adjacencyList[SELECTED_NODES_INDEXES[1]].vertex, 1, tempEdge);
+                GRAPH_ADJACENCY_LIST.addDirectedEdge(GRAPH_ADJACENCY_LIST.adjacencyList[SELECTED_NODES_INDEXES[0]].vertex, GRAPH_ADJACENCY_LIST.adjacencyList[SELECTED_NODES_INDEXES[1]].vertex, distance, tempEdge);
+
+                if (printStatement.length%2 === 0) {
+                    printStatement.push(`\n{from: ${SELECTED_NODES_INDEXES[0]}, to: ${SELECTED_NODES_INDEXES[1]}, weight: 1}, `);
+                } else {
+                    printStatement.push(`{from: ${SELECTED_NODES_INDEXES[0]}, to: ${SELECTED_NODES_INDEXES[1]}, weight: 1},`);
+                }
                 
                 SELECTED_NODES_INDEXES = [];
             }
@@ -211,19 +242,39 @@ function handleEdgeCreation() {
 dijkstraButton.addEventListener("click", () => {
     if (!IS_SELECTING_START && !IS_SELECTING_FINISH) {
         CURRENT_SORT_CRITERIA = lessThan;
+        if(IS_VISUALISED) {
+            resetForRevisualisation();
+        }
         dijkstra();
     }
 });
 
 astarButton.addEventListener("click", () => {
+    
     if (!IS_SELECTING_START && !IS_SELECTING_FINISH) {
         CURRENT_SORT_CRITERIA = lessThanWithHeuristic;
+        if(IS_VISUALISED) {
+            resetForRevisualisation();
+        }
         dijkstra();
     }
+    
+   /*
+   var temp = "";
+   for (let i = 0; i < printStatement.length; i++) {
+       temp = temp + printStatement[i];
+   }
+   console.log(temp);
+   */
 });
 
 resetButton.addEventListener("click", () => {
     reset()
+});
+
+westminsterButton.addEventListener("click", () => {
+    fullReset();
+    mapWestminster();
 });
 
 function reset() {
@@ -234,13 +285,37 @@ function reset() {
     IS_VISUALISED = false;
     IS_SELECTING_START = true;
     IS_SELECTING_FINISH = false;
+    IS_VISUALISING = false;
+    VISITED_ARRAY = [];
+    canvas.style.backgroundColor = 'rgba(255, 255, 255, 0)';
 }
 
 function resetNodes() {
     for (const edgelist of GRAPH_ADJACENCY_LIST.adjacencyList) {
         edgelist.vertex.node.key = Infinity;
         edgelist.vertex.node.object.reset();
+        edgelist.vertex.node.previousVertex = undefined;
     }
+}
+
+function fullReset() {
+    START_NODE_INDEX = null;
+    FINISH_NODE_INDEX = null;
+    SELECTED_NODES_INDEXES = [];
+    IS_VISUALISED = false;
+    IS_SELECTING_START = true;
+    IS_SELECTING_FINISH = false;
+    GRAPH_ADJACENCY_LIST = new AdjacencyList();
+    canvas.style.backgroundColor = 'rgba(255, 255, 255, 0)';
+}
+
+function resetForRevisualisation() {
+    VISITED_ARRAY = [];
+    for (let i = 0; i < GRAPH_ADJACENCY_LIST.adjacencyList.length; i++) {
+        if(i != START_NODE_INDEX && i != FINISH_NODE_INDEX) {
+            GRAPH_ADJACENCY_LIST.adjacencyList[i].vertex.node.object.reset();;
+        }
+    };
 }
 
 function randomiseVertices() {
@@ -283,8 +358,15 @@ function getRandomArbitrary(min, max) {
 
 
 function animate() {
-    context.clearRect(0, 0, innerWidth, innerHeight);
+    context.clearRect(0, 0, RIGHT_BOUNDS, BOTTOM_BOUNDS);
     requestAnimationFrame(animate);
+
+    if (RENDER_IMAGE_SRC != undefined) {
+        var img = new Image();
+        img.src = RENDER_IMAGE_SRC;
+        context.drawImage(img, 0, 0, canvas.width, canvas.height);
+    }
+
     for(let i = 0; i < GRAPH_ADJACENCY_LIST.adjacencyList.length; i++) {
         const edgeList = GRAPH_ADJACENCY_LIST.adjacencyList[i];
         const edges = edgeList.edges;
@@ -297,6 +379,9 @@ function animate() {
     }
     for (let i = 0; i < GRAPH_ADJACENCY_LIST.adjacencyList.length; i++) {
         GRAPH_ADJACENCY_LIST.adjacencyList[i].vertex.node.object.update();
+    }
+    for (let i = 0; i < GRAPH_ADJACENCY_LIST.triangles.length; i++) {
+        GRAPH_ADJACENCY_LIST.triangles[i].update();
     }
 }
 
@@ -319,45 +404,54 @@ function dijkstra() {
     IS_VISUALISING = true;
     // At the start, all nodes have already been initialised to infinity
     //Just as in dijkstra's algorithm, we first set the start node to a distane of 0.
-    console.log(START_NODE_INDEX)
     GRAPH_ADJACENCY_LIST.adjacencyList[START_NODE_INDEX].vertex.node.key = 0;
     //Initialise the min-heap
     initialiseHeap();
     //We loop as long as we have unvisited nodes
-    let itr = 0;
     while(UNVISITED_HEAP.length() > 0) {
         let closestNode = UNVISITED_HEAP.removeRoot();
         //console.log(`closest node: ${closestNode}`)
         //If we are surrounded/ there is no path for us to take, return the computed path as there is no path possible
         if(closestNode.key === Infinity) {
-            console.log('terminating as the closest node distance is infinity')
+            console.log('terminating as the closest node distance is infinity');
+            visualiseDijkstra();
             return VISITED_ARRAY;
         } 
-        //We have the closest vertex. We need its edgelist
-        const edgeList = GRAPH_ADJACENCY_LIST.adjacencyList[closestNode.index];
-        updateUnvisitedNeighbours(edgeList);
+        //We have the closest vertex. We need its index
+        updateUnvisitedNeighbours(closestNode.index);
         VISITED_ARRAY.push(closestNode);
-        if(IS_VISUALISED) {
-            closestNode.object.isVisited = true;
-            GRAPH_ADJACENCY_LIST.adjacencyList[closestNode.index].vertex.node.object.isVisited = true
-            if(closestNode.index === FINISH_NODE_INDEX) {
-                animateShortestPath();
-            }
-            
-        } else {
-            setTimeout(() => {
-                closestNode.object.isVisited = true;
-                GRAPH_ADJACENCY_LIST.adjacencyList[closestNode.index].vertex.node.object.isVisited = true
-                if(closestNode.index === FINISH_NODE_INDEX) {
-                    animateShortestPath();
-                }
-            }, 200 * itr);
-        }
+        closestNode.object.isVisited = true;
+        GRAPH_ADJACENCY_LIST.adjacencyList[closestNode.index].vertex.node.object.isVisited = true;
         if(closestNode.index === FINISH_NODE_INDEX) {
-            console.log('terminating due to hitting target')
+            console.log('terminating due to hitting target');
+            visualiseDijkstra();
             return VISITED_ARRAY;
         }
-        itr++;
+    }
+}
+
+function visualiseDijkstra() {
+    updateNodesInShortestPathOrder();
+    console.log(`Nodes searched: ${VISITED_ARRAY.length - 2}`)
+    if(IS_VISUALISED) {
+        for (let i = 0; i < VISITED_ARRAY.length; i++) {
+                GRAPH_ADJACENCY_LIST.adjacencyList[VISITED_ARRAY[i].index].vertex.node.object.visualVisited = true;
+                if(VISITED_ARRAY[i].index === FINISH_NODE_INDEX) {
+                    animateShortestPath();
+                }
+            
+        }
+        
+    } else {
+        for (let i = 0; i < VISITED_ARRAY.length; i++) {
+            setTimeout(() => {
+                GRAPH_ADJACENCY_LIST.adjacencyList[VISITED_ARRAY[i].index].vertex.node.object.visualVisited = true;
+                if(VISITED_ARRAY[i].index === FINISH_NODE_INDEX) {
+                    animateShortestPath();
+                }
+            }, 20 * i);
+            
+        }
     }
 }
 
@@ -398,8 +492,9 @@ function initialiseHeap() {
     }
 }
 
-function getUnvisitedNeighbours(edgeList) {
+function getUnvisitedNeighbours(index) {
     var neighbours = []
+    const edgeList = GRAPH_ADJACENCY_LIST.adjacencyList[index];
     if(edgeList.edges != null) {
         for (let i = 0; i < edgeList.edges.length; i++) {
             const edge = edgeList.edges[i]
@@ -411,9 +506,9 @@ function getUnvisitedNeighbours(edgeList) {
     return neighbours;
 }
 
-function updateUnvisitedNeighbours(edgeList) {
-    const unvisitedNeighbourEdges = getUnvisitedNeighbours(edgeList);
-    const vertex = edgeList.vertex;
+function updateUnvisitedNeighbours(index) {
+    const unvisitedNeighbourEdges = getUnvisitedNeighbours(index);
+    const vertex = GRAPH_ADJACENCY_LIST.adjacencyList[index].vertex;
     for (let i = 0; i < unvisitedNeighbourEdges.length; i++) {
         const edge = unvisitedNeighbourEdges[i];
         //Update only if new distance is less than known distance
@@ -452,23 +547,23 @@ function greaterThan(lhs, rhs) {
 }
 
 function animateShortestPath() {
-    const nodesInShortestPathOrder = getNodesInShortestPathOrder();
+    updateNodesInShortestPathOrder();
     if(IS_VISUALISED) {
-        for(let i = 0; i < nodesInShortestPathOrder.length; i++) {
-            const currentNode = nodesInShortestPathOrder[nodesInShortestPathOrder.length - 1 - i]
+        for(let i = 0; i < NODES_IN_SHORTEST_PATH_ORDER.length; i++) {
+            const currentNode = NODES_IN_SHORTEST_PATH_ORDER[NODES_IN_SHORTEST_PATH_ORDER.length - 1 - i]
             const index = currentNode.index;
 
             GRAPH_ADJACENCY_LIST.adjacencyList[index].vertex.node.object.isShortestPath = true;
         }
     } else {
-        for(let i = 0; i < nodesInShortestPathOrder.length; i++) {
+        for(let i = 0; i < NODES_IN_SHORTEST_PATH_ORDER.length; i++) {
             setTimeout(() => {
                 if(!IS_VISUALISED) {
-                    const currentNode = nodesInShortestPathOrder[nodesInShortestPathOrder.length - 1 - i]
+                    const currentNode = NODES_IN_SHORTEST_PATH_ORDER[NODES_IN_SHORTEST_PATH_ORDER.length - 1 - i]
                     const index = currentNode.index;
                     
                     GRAPH_ADJACENCY_LIST.adjacencyList[index].vertex.node.object.isShortestPath = true;
-                    if(i == nodesInShortestPathOrder.length - 1) {
+                    if(i == NODES_IN_SHORTEST_PATH_ORDER.length - 1) {
                         IS_VISUALISING = false;
                         IS_VISUALISED = true;
                     }
@@ -478,17 +573,16 @@ function animateShortestPath() {
     }
 }
 
-function getNodesInShortestPathOrder() {
-    const nodesInShortestPathOrder = [];
+function updateNodesInShortestPathOrder() {
+    NODES_IN_SHORTEST_PATH_ORDER = [];
     let currentNode = GRAPH_ADJACENCY_LIST.adjacencyList[FINISH_NODE_INDEX].vertex.node;
     while (currentNode != undefined) {
-        nodesInShortestPathOrder.unshift(currentNode);
+        NODES_IN_SHORTEST_PATH_ORDER.unshift(currentNode);
         if(currentNode.previousVertex === undefined) {
             break;
         }
         currentNode = currentNode.previousVertex.node;
     }
-    return nodesInShortestPathOrder;
 }
 
 function calculateHeuristic(index) {
@@ -497,3 +591,10 @@ function calculateHeuristic(index) {
 
     return Math.sqrt((xDisance * xDisance) + (yDistance * yDistance));
 };
+
+function calculateDistance(lhs, rhs) {
+    const xDisance = Math.floor(GRAPH_ADJACENCY_LIST.adjacencyList[lhs.index].vertex.node.object.x) - Math.floor(GRAPH_ADJACENCY_LIST.adjacencyList[rhs.index].vertex.node.object.x);
+    const yDistance = Math.floor(GRAPH_ADJACENCY_LIST.adjacencyList[lhs.index].vertex.node.object.y) - Math.floor(GRAPH_ADJACENCY_LIST.adjacencyList[rhs.index].vertex.node.object.y);
+
+    return Math.sqrt((xDisance * xDisance) + (yDistance * yDistance));
+}
