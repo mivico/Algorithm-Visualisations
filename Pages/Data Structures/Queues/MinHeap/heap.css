@@ -1,0 +1,46 @@
+.node {
+  aspect-ratio: 1/1;
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+.node p {
+  margin: auto;
+  text-align: center;
+  color: black;
+}
+
+#heap-grid {
+  display: grid;
+  max-width: 900px;
+  margin: 50px auto;
+}
+
+#canvas-holder {
+  width: 80%;
+  aspect-ratio: 16/9;
+  align-items: center;
+  display: flex;
+  margin: auto;
+  background-color: white;
+  outline: 1px solid black;
+}
+
+.node-selected {
+  background-color: rgba(200, 0, 0, 0.7);
+}
+
+.node-swapping {
+  background-color: green;
+}
+
+.active-anim {
+  color: green;
+  background-color: black;
+}
+
+.buttons-div {
+  margin-top: 50px;
+}

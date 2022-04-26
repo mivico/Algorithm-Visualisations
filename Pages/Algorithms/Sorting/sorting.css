@@ -1,0 +1,60 @@
+body,
+canvas {
+  margin: 0px;
+  padding: 0px;
+}
+
+#canvas-holder {
+  width: 80%;
+  aspect-ratio: 16/9;
+  align-items: center;
+  display: flex;
+  margin: auto;
+  background-color: white;
+  outline: 1px solid black;
+}
+
+#sorting-grid {
+  display: grid;
+  margin: 50px auto;
+}
+
+.sorting-button {
+  padding: 9px 25px;
+  background-color: rgba(0, 136, 169, 1);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: background-color 0.3s ease 0s;
+  margin-bottom: 50px;
+}
+
+.sorting-button p {
+  color: white;
+  margin: 0px auto;
+  font-size: large;
+}
+
+.pseudocode p {
+  text-align: left;
+}
+
+.sorting-page-div h2 {
+  margin: 20px auto;
+  text-align: center;
+  font-weight: 600;
+}
+
+.sorting-page-div h3 {
+  margin: 10px auto;
+  text-align: center;
+  font-weight: 600;
+  font-size: medium;
+  color: black;
+}
+
+.sorting-page-div p {
+  margin: auto;
+  font-size: small;
+}

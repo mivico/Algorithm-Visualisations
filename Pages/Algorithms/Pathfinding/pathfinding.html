@@ -19,7 +19,9 @@
                     <li><a href="../../Data Structures/data-structures.html">Data Structures</a></li>
                 </ul>
             </nav>
+            <!--
             <a class="cta" href="#">Contact</a>
+            -->
             <p class="menu cta">Menu</p>
         </header>
         <div class="overlay">
@@ -34,35 +36,234 @@
         <div class="pathfinding-page-div">
             <div>
                 <h1>
-                    Dijkstra's Algorithm
+                    Pathfinding Algorithms
                 </h1>
             </div>
 
-            <p>
-                Dijkstra's algorithm is an algorithm which solves the single source shortest path problem in a weighted directed graph. Given a source node, it is able to find the shortest path to every other node in the graph.
-            </p>
-
-            <h2>
-                Pseudocode
-            </h2>
+            <div id="page-grid">
+                <div class="grid-div">
+                    <h2>What is a pathfinding algorithm?</h2>
+                    <p>
+                        A pathfinding algorithm is an algorithm that finds the shortest path from one point to another.
+                        At it's core, all pathfinding algorithms use the same syntax by starting with a root node and traversing through all of its univisited neighbours until the target node is reached.
+                        What makes each algorithm differ is the priority queue it uses. Please ensure that you have read through and understood priority queues as they will be used heavily here. 
+                        As we'll discuss, not all algorithms are able to find the shortest path and not all algorithms work with weighted edges.
+                        <br>
+                        <br>
+                        Whether it is a simple grid-based graph where each node has 4 neighbours, or a more complex node-based graph with vertices and directed weighted edges, 
+                        at it's root, each pathfinding algorithm works with a graph. We will go into both types of graphs and see how each algorithm works within that graph.
+                    </p>
+                </div>
+                <div class="grid-div"><img src="./Images/AtoB.png" alt=""></div>
+                <div class="grid-div long-section">
+                    <h2>
+                        Dijkstra's algorithm
+                    </h2>
     
-            <div id="pathfinding-grid">
-            </div>
-            <div class="pathfinding-buttons-div">
-                <button id="reset-button" class="pathfinding-button cta">
-                    <p>Reset</p>
-                </button>
-                <button id="visualise-dijkstra" class="pathfinding-button cta">
-                    <p>Dijkstra</p>
-                </button>
-                <button id="visualise-astar" class="pathfinding-button cta">
-                    <p>A-Star</p>
-                </button>
+                    <p>
+                        Dijkstra's algorithm is a pathfinding algorithm that guarantees the shortest path in a weighted directed graph. This would be the algorithm we focus on as other weighted search algorithms are based on Dijkstra's algorithm. It is efficiently implemented using a min-heap. 
+                    </p>
+                </div>
+                 <div class="grid-div">
+                    <div class="pseudocode">
+                    <p style="font-weight: 700; margin-bottom: 20px">
+                        Pseudocode
+                    </p>
+                    <p style="font-weight: 500; margin-bottom: 10px">
+                        Dijkstra(s, t) {
+                    </p>
+                    <p id="anim-block-0" style="margin-left: 20px">
+                        For all vertices v, set the dist(v) to infinity
+                    </p>
+                    <p id="anim-block-1" style="margin-left: 20px">
+                        Set dist(s) = 0
+                    </p>
+                    <p id="anim-block-2"  style="margin-left: 20px">
+                        Initialise a priority queue with all vertices v using dist(v) as the key
+                    </p>
+                    <p style="margin-left: 20px;">
+                        While the queue is not empty {
+                    </p>
+                    <p id="anim-block-3" style="margin-left: 40px">
+                        u = EXTRACTROOT(queue)
+                    </p>
+                    <p style="margin-left: 40px">
+                        For every edge (u,v) in the edges of u {
+                    </p>
+                    <p id="anim-block-4" style="margin-left: 60px">
+                        If dist(v) > dist(u) + weight(u,v) {
+                    </p>
+                    <p id="anim-block-5" style="margin-left: 80px">
+                        dist(v) = dist(u) + weight(u,v)
+                    </p>
+                    <p id="anim-block-6" style="margin-left: 80px">
+                        DECREASEKEY(v, dist(v))
+                    </p>
+                    <p id="anim-block-7" style="margin-left: 80px">
+                        previousNode(v) = u
+                    </p>
+        
+                    <p style="margin-left: 60px">
+                        }
+                        <br>
+                        if u = t {
+                    </p>
+                    <p id="anim-block-8" style="margin-left: 80px">
+                        shortestPath = []
+                    </p>
+                    <p id="anim-block-9" style="margin-left: 80px">
+                        currentNode = u
+                    </p>
+                    <p style="margin-left: 80px">
+                        while currentNode != null {
+                    </p>
+                    <p id="anim-block-10" style="margin-left: 100px">
+                        shortestPath.append(currentNode)
+                    </p>
+                    <p id="anim-block-11" style="margin-left: 100px">
+                        currentNode = previousNode(currentNode)
+                    </p>
+                    <p style="margin-left: 80px">
+                        }
+                    </p>
+                    <p id="anim-block-12" style="margin-left: 100px">
+                        return shortestPath
+                    </p>
+                    <p style="margin-left: 60px">
+                    }
+                    </p>
+                    <p style="margin-left: 40px">
+                        }
+                    </p>
+                    <p style="margin-left: 20px">
+                        }
+                    </p>
+                    <p>
+                    }
+                    </p>
+                    </div>
+                </div>
+                <div class="grid-div">
+                    <div id="animation-grid">
+                    </div>
+                </div>
+                <div class="grid-div long-section">
+                    <h2>
+                        Lets walk through the pseudocode
+                    </h2>
+                    <p>
+                        Initially, we are calling dijkstra(s,t) where s is the source node and t and the target node. 
+                        The aim of this algorithm is to return the shortest path in an array of nodes to visit in order.
+                    </p>
+                    <br>
+                    <p>
+                        In our Initialisation step, as we dont know how far away each node is, we set all the distances to the nodes to infinity. 
+                        The only node we know the distance for is the source node. That node has a distance of 0 as we dont have to move to get to the source node.
+                        We then initialise a priority queue using the distance of each node as the key. We normally use a min-binary heap as the queue for Dijkstra's algorithm so as you know, our queue will have the source node at the start followed by every other node.
+        
+                    </p>
+                    <br>
+                    <p>
+                        We keep iterating as long as we have an element in the queue. We firstly extract the root of the queue. This should be the closest node as it is a min-heap.
+                        In the first iteration, this will be the source node as it will be at the front of the queue.
+                        We then check to see if the closest node has a distance of infinity then return if it is true. This allows us to end the loop early if we discover that the target node is unreachable.
+                    </p>
+                    <br>
+                    <p>
+                        Now for each vertex that is connected to the root by an edge, if the known distance to that vertex is larger than the distance to the root + the weight of the edge connecting them,
+                        this means that we have found a shorter path so we update the distance by decreasing the key. In the first iteration, each vertext connected to the root will have a distance of infinity so it will be updated as 0 < infinity.
+                        We then set the previous node of the current node. This allows us to know which node we came from.
+                    </p>
+                    <br>
+                    <p>
+                        We then check to see if the current node is equal to the target node. If it is, we traverse back to the root node to find the shortest path.
+                    </p>
+                    <br>
+                    <p>
+                        With other weighted search algorithms, the only difference is the priority queue. With the A* search, 
+                        rather than having a min-binary heap (where the heap property is the less than function), 
+                        the heap property accounts for a heuristic, the physical distance between the node and the target node. 
+                        This results in the algorithm visiting nodes generally directed towards the target. With this, you find that the A* search algorithm visits a lot less nodex making it run faster.
+                    </p>
+                </div>
+                <div class="grid-div long-section">
+                    <h2>
+                        Interactive visualisations
+                    </h2>
+    
+                    <p>
+                        Interact with both the grid based algorithm and the graph based algorithm to see how pathfinding algorithms work.
+                    </p>
+                </div>
+                <div class="grid-div">
+                    <div id="pathfinding-grid">
+                    </div>
+                    <div class="pathfinding-buttons-div" style="margin-top: 50px">
+                        <button id="grid-reset-button" class="pathfinding-button cta">
+                            <p>Reset</p>
+                        </button>
+                        <button id="grid-visualise-dijkstra" class="pathfinding-button cta">
+                            <p>Dijkstra</p>
+                        </button>
+                        <button id="grid-visualise-astar" class="pathfinding-button cta">
+                            <p>A-Star</p>
+                        </button>
+                        <button id="grid-visualise-bfs" class="pathfinding-button cta">
+                            <p>Breadth First Search</p>
+                        </button>
+                        <button id="grid-visualise-dfs" class="pathfinding-button cta">
+                            <p>Depth First Search</p>
+                        </button>
+                        <button id="recursive-division" class="pathfinding-button cta">
+                            <p>Recursive Division</p>
+                        </button>
+                    </div>
+                </div>
+                <div id="grid-explanation" class="grid-div">
+                    <h2>Click on an algorithm to view its description</h2>
+                </div>
+                <div class="grid-div">
+                    <div id="canvas-holder">
+                    <canvas></canvas>
+                    </div>
+    
+                    <div class="pathfinding-buttons-div">
+                        <button id="graph-reset-button" class="pathfinding-button cta">
+                            <p>Reset</p>
+                        </button>
+                        <button id="graph-visualise-dijkstra" class="pathfinding-button cta">
+                            <p>Dijkstra</p>
+                        </button>
+                        <button id="graph-visualise-astar" class="pathfinding-button cta">
+                            <p>A-Star</p>
+                        </button>
+                        <button id="graph-visualise-bfs" class="pathfinding-button cta">
+                            <p>Breadth First Search</p>
+                        </button>
+                        <button id="graph-visualise-dfs" class="pathfinding-button cta">
+                            <p>Depth First Search</p>
+                        </button>
+                    </div>
+                </div>
+                <div id="graph-explanation" class="grid-div">
+                    <h2>Click on a start node then a target node</h2>
+                </div>
             </div>
         </div>
     </body>
     <script type="text/javascript" src="../../../index.js" defer></script>
     <script type="text/javascript" src="../../Data Structures/Queues/MinHeap/binaryheap.js" defer></script>
+    <script type="text/javascript" src="../../Data Structures/Queues/priorityQueue.js" defer></script>
+    <script type="text/javascript" src="./Algorithm Scripts/bfs.js" defer></script>
+    <script type="text/javascript" src="./Algorithm Scripts/gridFirstSearch.js" defer></script>
+    <script type="text/javascript" src="./Algorithm Scripts/dfs.js" defer></script>
     <script type="text/javascript" src="./pathfinding.js" defer></script>
+    <script type="text/javascript" src="./gridAnimation.js" defer></script>
+    <script type="text/javascript" src="../../Data Structures/Graph/vertex.js" defer></script>
+    <script type="text/javascript" src="../../Data Structures/Graph/edge.js" defer></script>
+    <script type="text/javascript" src="../../Data Structures/Graph/adjacency-list.js" defer></script>
+    <script type="text/javascript" src="./Node-based/Canvas Classes/Maps/Westminster/westminster.js" defer></script>
+    <script type="text/javascript" src="./Node-based/Canvas Classes/classes.js" defer></script>
+    <script type="text/javascript" src="./Node-based/node-based-pathfinding.js" defer></script>
     <script type="text/javascript" src="./Algorithm Scripts/dijkstra.js" defer></script>
 </html>

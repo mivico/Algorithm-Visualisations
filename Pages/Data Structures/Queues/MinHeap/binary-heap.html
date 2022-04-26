@@ -2,10 +2,11 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>Dijkstra's Algorithm</title>
+        <title>Binary Heap</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="../../../../styles.css">
+        <link rel="stylesheet" href="./heap.css">
         <link href="https://fonts.googleapis.com/css?family=Montserrat:500&display=swap" rel="stylesheet">
     </head>
     <body>
@@ -18,7 +19,6 @@
                     <li><a href="../../data-structures.html">Data Structures</a></li>
                 </ul>
             </nav>
-            <a class="cta" href="#">Contact</a>
             <p class="menu cta">Menu</p>
         </header>
         <div class="overlay">
@@ -33,26 +33,139 @@
         <div class="dijkstra-page-div">
             <div>
                 <h1>
-                    Dijkstra's Algorithm
+                    Binary Heap
                 </h1>
             </div>
+            <div id="page-grid">
+                <div class="grid-div long-section">
+                    <h2 style="margin-bottom: 20px;">What is a binary heap</h2>
+                    <p>
+                        A binary heap is an almost complete tree where each node has a maximum of two children. The heap has a property where it maintains the highest (or lowest) priority element at its root. An example of this would be a heap which always keeps the smallest element at its root.
+                    </p>
+                </div>
+                <div class="grid-div">
+                    <div class="pseudocode">
+                        <p style="font-weight: 700; margin-bottom: 20px">
+                            Pseudocode
+                        </p>
+                        <!--Build-->
+                        <p style="font-weight: 500; margin-bottom: 10px">
+                            Build() {
+                        </p>
+                        <p id="anim-block-0" style="margin-left: 20px">
+                            for each parent node traversing from right to left with index i {
+                        </p>
+                        <p id="anim-block-1" style="margin-left: 40px">
+                            if array[i] > leftChild(i) or rightChild(i) {
+                        </p>
+                        <p id="anim-block-2"  style="margin-left: 60px">
+                            Heapify(i)
+                        </p>
+                        <p style="margin-left: 40px;">
+                            }
+                        </p>
+                        <br>
+                        <p style="font-weight: 500;">
+                            }
+                        </p>
+                        <br>
 
-            <p>
-                Dijkstra's algorithm is an algorithm which solves the single source shortest path problem in a weighted directed graph. Given a source node, it is able to find the shortest path to every other node in the graph.
-            </p>
+                        <!--Deletion-->
+                        <p style="font-weight: 500; margin-bottom: 10px">
+                            Delete(i) {
+                        </p>
+                        <p id="anim-block-3" style="margin-left: 20px">
+                            Swap the last element with the element at index i
+                        </p>
+                        <p id="anim-block-4" style="margin-left: 20px">
+                            Delete the last element
+                        </p>
+                        <p id="anim-block-5" style="margin-left: 20px">
+                            Build()
+                        </p>
+                        <br>
+                        <p style="font-weight: 500">
+                            }
+                        </p>
+                        <br>
 
-            <h2>
-                Pseudocode
-            </h2>
-    
-            <div id="dijkstra-grid">
-            </div>
-            <div class="dijkstra-buttons-div">
-                <button id="reset-button" class="dijkstra-button">
-                    <h2>Reset</h2>
-                </button>
+                        <!--Insert-->
+                        <p style="font-weight: 500; margin-bottom: 10px">
+                            Insert() {
+                        </p>
+                        <p id="anim-block-6" style="margin-left: 20px">
+                            Insert new element at the end of the heap array
+                        </p>
+                        <p id="anim-block-7" style="margin-left: 20px">
+                            Build()
+                        </p>
+                        <br>
+                        <p style="font-weight: 500;">
+                            }
+                        </p>
+                        <br>
+
+                        <!--Heapify-->
+                        <p style="font-weight: 500; margin-bottom: 10px">
+                            Heapify(index) {
+                        </p>
+                        <p id="anim-block-8" style="margin-left: 20px">
+                            Store index as the smallestIndex
+                        </p>
+                        <p id="anim-block-9" style="margin-left: 20px">
+                            if (leftChild < array[smallestIndex]) { smallestIndex = leftIndex }
+                        </p>
+                        <p id="anim-block-10" style="margin-left: 20px">
+                            if (rightChild < array[smallestIndex]) { smallestIndex = rightIndex }
+                        </p>
+                        <p style="margin-left: 20px">
+                            if (smallestIndex != currentIndex) {
+                        </p>
+                        <p id="anim-block-11" style="margin-left: 40px">
+                            swap(index, smallestIndex)
+                        </p>
+                        <p id="anim-block-12" style="margin-left: 40px">
+                            heapify(smallestIndex)
+                        </p>
+                        <p style="margin-left: 20px">
+                            }
+                        </p>
+                        <br>
+                        <p style="font-weight: 500;">
+                            }
+                        </p>
+                    </div>
+                </div>
+                <div class="grid-div">
+                    <div id="canvas-holder">
+                    <canvas></canvas>
+                    </div>
+                    <div id="heap-grid">
+                    </div>
+                    <div class="buttons-div">
+                        <button id="initialise" class="pathfinding-button cta">
+                            <p>Initialise</p>
+                        </button>
+                        <button id="build" class="pathfinding-button cta">
+                            <p>Build</p>
+                        </button>
+                        <button id="delete" class="pathfinding-button cta">
+                            <p>Deletion</p>
+                        </button>
+                        <button id="insert" class="pathfinding-button cta">
+                            <p>Insert</p>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </body>
+    <script type="text/javascript" src="../../../../index.js" defer></script>
+    <script type="text/javascript" src="../../Graph/adjacency-list.js" defer></script>
+    <script type="text/javascript" src="../../Graph/edge.js" defer></script>
+    <script type="text/javascript" src="../../Graph/vertex.js" defer></script>
+    <script type="text/javascript" src="../../../Algorithms/Pathfinding/Node-based/Canvas Classes/classes.js" defer></script>
     <script type="text/javascript" src="./binaryheap.js" defer></script>
+    <script type="text/javascript" src="./heapPage.js" defer></script>
+    <script type="text/javascript" src="../../../Algorithms/Sorting/Sorting Algorithms/mergeSort.js" defer></script>
 </html>

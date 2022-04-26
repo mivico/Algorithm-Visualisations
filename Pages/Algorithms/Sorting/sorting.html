@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Sorting Algorithms</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="../../../styles.css">
+        <link rel="stylesheet" href="./sorting.css">
+        <link href="https://fonts.googleapis.com/css?family=Montserrat:500&display=swap" rel="stylesheet">
+    </head>
+    <body>
+        <header>
+            <!--<a class="logo" href="/"><img src="images/logo.svg" alt="logo"></a>-->
+            <nav>
+                <ul class="nav__links">
+                    <li><a href="../../../index.html">Home</a></li>
+                    <li><a href="../../Algorithms/algorithms.html">Algorithms</a></li>
+                    <li><a href="../../Data Structures/data-structures.html">Data Structures</a></li>
+                </ul>
+            </nav>
+            <!--
+            <a class="cta" href="#">Contact</a>
+            -->
+            <p class="menu cta">Menu</p>
+        </header>
+        <div class="overlay">
+            <a class="close">&times;</a>
+            <div class="overlay__content">
+                <a href="../../../index.html">Home</a>
+                <a href="../../Algorithms/algorithms.html">Algorithms</a>
+                <a href="../../Data Structures/data-structures.html">Data Structures</a>
+            </div>
+        </div>
+        <!--End of navigation-->
+        <div class="sorting-page-div">
+            <div>
+                <h1>
+                    Sorting Algorithms
+                </h1>
+            </div>
+
+            <div id="page-grid">
+                <div class="grid-div long-section">
+                    <h2>What is a sorting algorithm?</h2>
+                    <p>
+                        A sorting algorithm is an algorithm that sorts an array of elements.
+                    </p>
+                </div>
+                <!--
+                <div class="grid-div">
+                   <div class="pseudocode">
+                   <p style="font-weight: 700; margin-bottom: 20px">
+                       Pseudocode
+                   </p>
+                   <p style="font-weight: 500; margin-bottom: 10px">
+                       Dijkstra(s, t) {
+                   </p>
+                   <p id="anim-block-0" style="margin-left: 20px">
+                       For all vertices v, set the dist(v) to infinity
+                   </p>
+                   <p id="anim-block-1" style="margin-left: 20px">
+                       Set dist(s) = 0
+                   </p>
+                   <p id="anim-block-2"  style="margin-left: 20px">
+                       Initialise a priority queue with all vertices v using dist(v) as the key
+                   </p>
+                   <p style="margin-left: 20px;">
+                       While the queue is not empty {
+                   </p>
+                   <p id="anim-block-3" style="margin-left: 40px">
+                       u = EXTRACTROOT(queue)
+                   </p>
+                   <p style="margin-left: 40px">
+                       For every edge (u,v) in the edges of u {
+                   </p>
+                   <p id="anim-block-4" style="margin-left: 60px">
+                       If dist(v) > dist(u) + weight(u,v) {
+                   </p>
+                   <p id="anim-block-5" style="margin-left: 80px">
+                       dist(v) = dist(u) + weight(u,v)
+                   </p>
+                   <p id="anim-block-6" style="margin-left: 80px">
+                       DECREASEKEY(v, dist(v))
+                   </p>
+                   <p id="anim-block-7" style="margin-left: 80px">
+                       previousNode(v) = u
+                   </p>
+       
+                   <p style="margin-left: 60px">
+                       }
+                       <br>
+                       if u = t {
+                   </p>
+                   <p id="anim-block-8" style="margin-left: 80px">
+                       shortestPath = []
+                   </p>
+                   <p id="anim-block-9" style="margin-left: 80px">
+                       currentNode = u
+                   </p>
+                   <p style="margin-left: 80px">
+                       while currentNode != null {
+                   </p>
+                   <p id="anim-block-10" style="margin-left: 100px">
+                       shortestPath.append(currentNode)
+                   </p>
+                   <p id="anim-block-11" style="margin-left: 100px">
+                       currentNode = previousNode(currentNode)
+                   </p>
+                   <p style="margin-left: 80px">
+                       }
+                   </p>
+                   <p id="anim-block-12" style="margin-left: 100px">
+                       return shortestPath
+                   </p>
+                   <p style="margin-left: 60px">
+                   }
+                   </p>
+                   <p style="margin-left: 40px">
+                       }
+                   </p>
+                   <p style="margin-left: 20px">
+                       }
+                   </p>
+                   <p>
+                   }
+                   </p>
+                   </div>
+               </div>
+               <div class="grid-div">
+                   <div id="animation-sorting-canvas-holder">
+                    <canvas id="animation-sorting-canvas"></canvas>
+                   </div>
+               </div>
+                <div class="grid-div long-section">
+                    <h2>
+                        Dijkstra's algorithm
+                    </h2>
+    
+                    <p>
+                        Dijkstra's algorithm is a pathfinding algorithm that guarantees the shortest path in a weighted directed graph. This would be the algorithm we focus on as other weighted search algorithms are based on Dijkstra's algorithm. It is efficiently implemented using a min-heap. 
+                    </p>
+                </div>
+            -->
+            </div>
+
+            <div id="canvas-holder">
+                <canvas id="main-sorting-canvas"></canvas>
+            </div>
+            <div id="sorting-grid">
+            </div>
+            <div class="sorting-buttons-div">
+                <button id="reset-button" class="sorting-button cta">
+                    <p>Reset</p>
+                </button>
+                <button id="quicksort-button" class="sorting-button cta">
+                    <p>Quicksort</p>
+                </button>
+                <button id="heapsort-button" class="sorting-button cta">
+                    <p>Heapsort</p>
+                </button>
+                <!--
+                <button id="mergesort-button" class="sorting-button cta">
+                    <p>Mergesort</p>
+                </button>
+                -->
+                <button id="insertionsort-button" class="sorting-button cta">
+                    <p>Insertion sort</p>
+                </button>
+                <button id="bubblesort-button" class="sorting-button cta">
+                    <p>Bubble sort</p>
+                </button>
+                <button id="shellsort-button" class="sorting-button cta">
+                    <p>Shell sort</p>
+                </button>
+            </div>
+        </div>
+    </body>
+    <script type="text/javascript" src="../../../index.js" defer></script>
+    <script type="text/javascript" src="../../Data Structures/Queues/MinHeap/binaryheap.js" defer></script>
+    <script type="text/javascript" src="./sorting.js" defer></script>
+    <script type="text/javascript" src="./animationSorting.js" defer></script>
+    <script type="text/javascript" src="./Sorting Algorithms/quickSort.js" defer></script>
+    <script type="text/javascript" src="./Sorting Algorithms/heapSort.js" defer></script>
+    <script type="text/javascript" src="./Sorting Algorithms/mergeSort.js" defer></script>
+    <script type="text/javascript" src="./Sorting Algorithms/insertionSort.js" defer></script>
+    <script type="text/javascript" src="./Sorting Algorithms/bubbleSort.js" defer></script>
+    <script type="text/javascript" src="./Sorting Algorithms/shellSort.js" defer></script>
+    <script type="text/javascript" src="./bar.js" defer></script>
+</html>

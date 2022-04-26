@@ -12,7 +12,9 @@ class Circle {
         this.visualVisited = false;
         this.isStart = false;
         this.isFinish = false;
+        this.isQueued = false;
         this.isShortestPath = false;
+        this.isSwapping = false;
 
         this.red = 200;
         this.dr = 1;
@@ -20,24 +22,38 @@ class Circle {
 
         this.draw = () => {
             context.beginPath();
-            context.arc(this.x, this.y, NODE_RADIUS, 0, Math.PI * 2, false);
+            if(this.isFinish || this.isStart) {
+                context.arc(this.x, this.y, NODE_RADIUS*2, 0, Math.PI * 2, false);
+            } else if(this.visualVisited) {
+                context.arc(this.x, this.y, NODE_RADIUS*1.5, 0, Math.PI * 2, false);
+            } else {
+                context.arc(this.x, this.y, NODE_RADIUS, 0, Math.PI * 2, false);
+            }
 
             if(this.isStart) {
-                context.fillStyle = `rgba(0, 0, 255, 0.7)`;
+                context.fillStyle = `green`;
                 context.fill();
             } else if (this.isFinish) {
-                context.fillStyle = `rgba(0, 255, 0, 0.7)`;
+                context.fillStyle = `red`;
+                context.fill();
+            } else if (this.isSwapping) {
+                context.fillStyle = `green`;
                 context.fill();
             } else if (this.isShortestPath) {
                 context.fillStyle = `rgba(255, 0, 255, 0.7)`;
                 context.fill();
             } else if(this.visualVisited) {
-                context.fillStyle = `rgba(0, 0, 0, 0.7)`;
+                context.fillStyle = `rgba(0, 190, 218, 1)`;
                 context.fill();
             } else if(this.isSelected) {
                 context.fillStyle = `rgba(${this.red}, 0, 0, 0.7)`;
                 context.fill();
-            } else {
+            } 
+            /* else if (this.isQueued) {
+                context.fillStyle = `rgba(20, 200, 72, 0.7)`;
+                context.fill();
+            } 
+            */ else {
                 context.strokeStyle = `rgba(0, 0, 255, 0.7)`;
                 context.stroke();
             }
@@ -65,6 +81,7 @@ class Circle {
             this.isStart = false;
             this.isFinish = false;
             this.isShortestPath = false;
+            this.isQueued = false;
         }
     }
 }
