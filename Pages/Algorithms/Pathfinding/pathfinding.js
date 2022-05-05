@@ -1,3 +1,4 @@
+
 let GRID_COLS = 40;
 let GRID_ROWS = 40;
 const GRID_BORDER_COLOR = "1px solid rgba(50, 50, 150, 0.4)"
@@ -8,7 +9,7 @@ var IS_VISUALISED = false;
 var IS_CLICKING = false;
 var START_NODE_INDEX = Math.floor(GRID_ROWS/2)*GRID_COLS + Math.floor(GRID_COLS/4);
 var FINISH_NODE_INDEX = Math.floor(GRID_ROWS/2)*GRID_COLS + 3 * Math.floor(GRID_COLS/4);
-var GRID_QUEUE = new PriorityQueue();
+var GRID_QUEUE = new LinearDataStructure();
 var VISITED_ARRAY = [];
 var CURRENT_ALGORITHM = undefined;
 var CURRENT_SORT_CRITERIA = undefined;
@@ -22,7 +23,7 @@ const gridResetButton = document.getElementById("grid-reset-button");
 
 //Explanations
 const gridExplanation = document.getElementById("grid-explanation");
-//const graphExplanation = document.getElementById("graph-explanation");
+const graphExplanation = document.getElementById("graph-explanation");
 
 //Algo info
 var VISITED_COUNTER = 0;
@@ -111,8 +112,46 @@ gridResetButton.addEventListener("click", () => {
 });
 
 recursiveDivisionButton.addEventListener("click", async () => {
-    await generate()
+    //await generate()
+    await addOuterWalls();
+    await divide(1, 1, GRID_COLS - 2, GRID_ROWS - 2);
 });
+
+function coordToIndex(x, y) {
+    return y*GRID_COLS + x;
+}
+
+async function divide(leftX, leftY, rightX, rightY) {
+    const width = Math.abs(rightX - leftX);
+    const height = Math.abs(leftY - rightY);
+    var dir = chooseOrientation(width, height);
+    //Choose where to draw line
+    if (dir == 1) {
+        //Vertical
+        if (Math.abs(leftX - rightX) < 3) {
+            return;
+        }
+        //Choose random number across x axis
+        let wallX = getRndInteger(leftX + 2, rightX - 2);
+        await addVWall(leftY, rightY, wallX);
+        Promise.all([
+            await divide(leftX, leftY, wallX - 1, rightY),
+            await divide(wallX + 1, leftY, rightX, rightY)
+        ]);
+    } else {
+        //Horizontal
+        if (Math.abs(leftY - rightY) < 3) {
+            return;
+        }
+        //Choose random number across y axis
+        let wallY = getRndInteger(leftY + 2, rightY - 2);
+        await addHWall(leftX, rightX, wallY);
+        Promise.all([
+            await divide(leftX, leftY, rightX, wallY - 1),
+            await divide(leftX, wallY + 1, rightX, rightY)
+        ]);
+    }
+}
 
 async function generate() {
     Promise.all([
@@ -144,7 +183,8 @@ async function addInnerWalls(h, minX, maxX, minY, maxY, gate) {
 }
 
 async function addHWall(minX, maxX, y) {
-    var hole = Math.floor(randomNumber(minX, maxX)/2)*2+1;
+    var hole = getRndInteger(minX, maxX + 1);
+    //var hole = Math.floor(randomNumber(minX, maxX)/2)*2+1;
 
     for (var i = minX; i <= maxX; i++) {
         if (i != hole) {
@@ -152,10 +192,12 @@ async function addHWall(minX, maxX, y) {
             await drawWall(coordinate);
         }
     }
+    await sleep(100)
 }
 
 async function addVWall(minY, maxY, x) {
-    var hole = Math.floor(randomNumber(minY, maxY)/2)*2+1;
+    var hole = getRndInteger(minY, maxY + 1);
+    //var hole = Math.floor(randomNumber(minY, maxY)/2)*2+1;
 
     for (var i = minY; i <= maxY; i++) {
         if (i != hole) {
@@ -284,7 +326,6 @@ function search() {
         case "dfs":
             GRID_QUEUE = new Stack();
             gridfirstSearch();
-            gridAddNeighboursToStack;
         case "bfs":
             GRID_QUEUE = new Queue();
             gridfirstSearch();
@@ -435,17 +476,12 @@ function handleMouseEnter(coordinate) {
 
 async function drawWall(coordinate) {
     const node = GRID_NODES[coordinate];
-    await sleep(0.1)
     if(!node.classList.contains("node-start") && !node.classList.contains("node-finish")) {
         if(node.classList.contains("node-visited")) {
            node.classList.remove("node-visited");
            node.node.object.isVisited = false;
            node.classList.add("node-wall");
            node.node.object.isWall = true;
-           revisualise();
-        } else if(node.classList.contains("node-wall")) {
-           node.classList.remove("node-wall");
-           node.node.object.isWall = false;
            revisualise();
         } else {
            node.classList.add("node-wall");
@@ -530,9 +566,19 @@ function greaterThan(lhs, rhs) {
     }
 }
 
+function indexToCoord(index) {
+    const x = index%GRID_COLS;
+    const y = Math.floor(index/GRID_COLS)
+
+    return {
+        x: x,
+        y: y
+    }
+}
+
 function calculateHeuristic(coordinate) {
-    const xDisance = FINISH_NODE_INDEX%GRID_COLS - coordinate%GRID_COLS;
-    const yDistance = Math.floor(FINISH_NODE_INDEX/GRID_COLS) - Math.floor(coordinate/GRID_COLS);
+    const xDisance = indexToCoord(FINISH_NODE_INDEX).x - indexToCoord(coordinate).x
+    const yDistance = indexToCoord(FINISH_NODE_INDEX).y - indexToCoord(coordinate).y
 
     return Math.sqrt((xDisance * xDisance) + (yDistance * yDistance));
 };
@@ -542,9 +588,11 @@ function revisualise() {
         resetForRevisualisation();
         switch (CURRENT_ALGORITHM) {
             case "dfs":
+                GRID_QUEUE = new Stack();
                 gridfirstSearch();
                 break;
             case "bfs":
+                GRID_QUEUE = new Queue();
                 gridfirstSearch();
                 break;
             case "dijkstra":
@@ -557,6 +605,7 @@ function revisualise() {
         updateInfo();
         IS_VISUALISING = false;
     }
+
 }
 
 function updateGridExplanation() {
@@ -576,21 +625,21 @@ function updateGridExplanation() {
 }
 
 function updateGraphExplanation() {
-    if(GRAPH_CURRENT_ALGORITHM == graphDijkstra && GRAPH_CURRENT_SORT_CRITERIA === graphLessThan) {
-        document.getElementById("graph-explanation").innerHTML = graphExplanationDijkstra
-    } else if(GRAPH_CURRENT_ALGORITHM == graphDijkstra && GRAPH_CURRENT_SORT_CRITERIA === graphLessThanWithHeuristic) {
-        document.getElementById("graph-explanation").innerHTML = graphExplanationAstar
-    } else if(GRAPH_CURRENT_ALGORITHM == graphBfs) {
-        document.getElementById("graph-explanation").innerHTML = graphExplanationBfs
-    } else if(GRAPH_CURRENT_ALGORITHM == graphDfs) {
-        document.getElementById("graph-explanation").innerHTML = graphExplanationDfs
+    if(GRAPH_CURRENT_ALGORITHM == "dijkstra") {
+        graphExplanation.innerHTML = graphExplanationDijkstra
+    } else if(GRAPH_CURRENT_ALGORITHM == "astar") {
+        graphExplanation.innerHTML = graphExplanationAstar
+    } else if(GRAPH_CURRENT_ALGORITHM == "bfs") {
+        graphExplanation.innerHTML = graphExplanationBfs
+    } else if(GRAPH_CURRENT_ALGORITHM == "dfs") {
+        graphExplanation.innerHTML = graphExplanationDfs
     } else {
         if (GRAPH_IS_SELECTING_START || GRAPH_IS_SELECTING_FINISH) {
-            document.getElementById("graph-explanation").innerHTML = `
+            graphExplanation.innerHTML = `
             <h2>Click on a start node then a target node</h2>
             `
         } else {
-            document.getElementById("graph-explanation").innerHTML = `
+            graphExplanation.innerHTML = `
             <h2>Click on an algorithm to view its description</h2>
             `
         }
@@ -684,7 +733,7 @@ const gridExplanationBfs = `
     </p>
     <br>
     <p>
-        The breadth first search is implemented with a queue as the priority queue
+        The breadth first search is implemented with a queue as the data structure
     </p>
     <br>
     <p id="visited-counter">
@@ -714,11 +763,11 @@ const gridExplanationDfs = `
     </p>
     <br>
     <p>
-        The depth first search is implemented with a stack as the priority queue
+        The depth first search is implemented with a stack as the data structure
     </p>
     <br>
     <p>
-        In this implementation, the neighbours are added to the stack in a down, left, right, up order
+        In this implementation, the neighbours are added to the stack in a right, down, left, right, up order
     </p>
     <br>
     <p id="visited-counter">
@@ -730,7 +779,7 @@ const gridExplanationDfs = `
     </p>
     <br>
     <p id="path-length">
-        The length of the shortest path is ${GRID_NODES[FINISH_NODE_INDEX].key}
+        The length of the returned path is ${GRID_NODES[FINISH_NODE_INDEX].key}
     </p>
 </div>
 `
@@ -834,7 +883,7 @@ const graphExplanationBfs = `
     </p>
     <br>
     <p>
-        The breadth first search is implemented with a queue as the priority queue
+        The breadth first search is implemented with a queue as the data structure
     </p>
     <br>
     <p id="graph-visited-counter">
@@ -846,7 +895,7 @@ const graphExplanationBfs = `
     </p>
     <br>
     <p id="graph-path-length">
-        The length of the shortest path is ${GRID_NODES[FINISH_NODE_INDEX].key} units
+        The length of the returned path is ${GRID_NODES[FINISH_NODE_INDEX].key} units
     </p>
 </div>
 `
@@ -868,7 +917,7 @@ const graphExplanationDfs = `
     </p>
     <br>
     <p>
-        The depth first search is implemented with a stack as the priority queue
+        The depth first search is implemented with a stack as the data structure
     </p>
     <br>
     <p id="graph-visited-counter">
@@ -880,7 +929,7 @@ const graphExplanationDfs = `
     </p>
     <br>
     <p id="graph-path-length">
-        The length of the shortest path is ${GRID_NODES[FINISH_NODE_INDEX].key} units
+        The length of the returned path is ${GRID_NODES[FINISH_NODE_INDEX].key} units
     </p>
 </div>
 `

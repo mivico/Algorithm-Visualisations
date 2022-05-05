@@ -7,6 +7,7 @@ const GRID_BORDER_COLOR = "1px solid rgba(50, 50, 150, 0.4)"
 var heapArray = [];
 var DRAW_COUNTER = 0.1;
 var DRAW_INSTRUCTIONS = [];
+var FRAME_NUMBER = 0;
 
 //Buttons
 const initialiseButton = document.getElementById("initialise");

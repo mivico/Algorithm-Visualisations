@@ -14,19 +14,15 @@ function dijkstra() {
         if(closestNode.key === Infinity) {
             ALGORITHM_TIMER = Date.now() - startTime;
             IS_VISUALISING = false;
+            IS_VISUALISED = true;
+            //console.log('terminated due to inf')
             return VISITED_ARRAY;
         } 
         //The continue keyword ends one iteration of the loop. Essentially, if the closest node is a wall, we start again with a smaller array since we have shifted the array
         if(closestNode.object.isWall === true) {
             itr++;
             continue;
-        } 
-        //If we are surrounded/ there is no path for us to take, return the computed path as there is no path possible
-        if(closestNode.key === Infinity) {
-            ALGORITHM_TIMER = Date.now() - startTime;
-            IS_VISUALISING = false;
-            return VISITED_ARRAY;
-        } 
+        }
         updateUnvisitedNeighbours(closestNode);
         VISITED_ARRAY.push(closestNode);
         if(IS_VISUALISED) {
@@ -56,6 +52,7 @@ function dijkstra() {
         }
         if(closestNode.object.coordinate === FINISH_NODE_INDEX) {
             ALGORITHM_TIMER = Date.now() - startTime;
+            //console.log('terminated due to hitting target')
             return VISITED_ARRAY;
         }
         itr++;
@@ -68,17 +65,12 @@ function updateUnvisitedNeighbours(node) {
         //Update only if new distance is less than known distance
 
         if(neighbour.key > node.key + neighbour.object.weight) {
-            var replacement = new HeapNode(node.key + neighbour.object.weight, {
-                isFinish: neighbour.object.isFinish,
-                isStart: neighbour.object.isStart,
-                isVisited: neighbour.object.isVisited,
-                isWall: neighbour.object.isWall,
-                coordinate: neighbour.object.coordinate,
-                weight: neighbour.object.weight
-            });
-            replacement.previousNode = node;
-            UNVISITED_HEAP.replace(neighbour, replacement);
-            GRID_NODES[neighbour.object.coordinate].node.key = replacement.key;
+            const newKey = node.key + neighbour.object.weight;
+            neighbour.previousNode = node;
+            if(CURRENT_ALGORITHM === "dijkstra" || CURRENT_ALGORITHM === "astar") {
+                UNVISITED_HEAP.decreaseKey(neighbour, newKey);
+            }
+            GRID_NODES[neighbour.object.coordinate].node.key = newKey;
             GRID_NODES[neighbour.object.coordinate].node.previousNode = node;
         }
     }

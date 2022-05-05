@@ -11,6 +11,7 @@ const graphDfsButton = document.getElementById("graph-visualise-dfs");
 var printStatement = [];
 
 var RENDER_IMAGE_SRC = undefined;
+var FRAME_NUMBER = 0;
 
 canvas.width = canvasDiv.clientWidth;
 canvas.height = canvasDiv.clientHeight;
@@ -34,6 +35,9 @@ var GRAPH_CURRENT_VERTEX_INDEX = undefined;
 var SELECTED_NODES_INDEXES = []
 var START_CLICK = 0;
 
+var GRAPH_IS_DRAGGING_START = false;
+var GRAPH_IS_DRAGGING_FINISH = false;
+
 var GRAPH_ADJACENCY_LIST = new AdjacencyList();
 var GRAPH_UNVISITED_HEAP = new BinaryHeap([], graphLessThanWithHeuristic);
 
@@ -48,6 +52,7 @@ var GRAPH_FINISH_NODE_INDEX = null;
 var GRAPH_VISITED_ARRAY = [];
 var GRAPH_NODES_IN_SHORTEST_PATH_ORDER = [];
 var GRAPH_CURRENT_ALGORITHM = undefined;
+var GRAPH_QUEUE = new Stack();
 
 var GRAPH_CURRENT_SORT_CRITERIA = graphLessThanWithHeuristic;
 
@@ -109,7 +114,11 @@ window.onmousemove = (e) => {
     if(GRAPH_IS_CLICKING && GRAPH_CURRENT_VERTEX_INDEX != undefined && GRAPH_IS_SELECTING) {
         //handleVertexMove();
     } else {
-        updateCurrentVertexIndex();
+        if(isInCavas(e)) {
+            updateCurrentVertexIndex();
+        } else {
+            CURRENT_VERTEX_INDEX = undefined;
+        }
     }
 }
 
@@ -249,30 +258,25 @@ function handleEdgeCreation() {
 
 graphDijkstraButton.addEventListener("click", () => {
     if (!GRAPH_IS_SELECTING_START && !GRAPH_IS_SELECTING_FINISH) {
-        GRAPH_CURRENT_ALGORITHM = graphDijkstra
+        GRAPH_CURRENT_ALGORITHM = "dijkstra"
         GRAPH_CURRENT_SORT_CRITERIA = graphLessThan;
         if(GRAPH_IS_VISUALISED) {
             graphResetForRevisualisation();
         }
-        GRAPH_CURRENT_ALGORITHM();
-        updateGraphExplanation();
-        updateGraphInfo();
+        graphSearch();
     } else {
         alert('Please select start and target nodes');
     }
 });
 
 graphAstarButton.addEventListener("click", () => {
-    
     if (!GRAPH_IS_SELECTING_START && !GRAPH_IS_SELECTING_FINISH) {
-        GRAPH_CURRENT_ALGORITHM = graphDijkstra
+        GRAPH_CURRENT_ALGORITHM = "astar"
         GRAPH_CURRENT_SORT_CRITERIA = graphLessThanWithHeuristic;
         if(GRAPH_IS_VISUALISED) {
             graphResetForRevisualisation();
         }
-        GRAPH_CURRENT_ALGORITHM();
-        updateGraphExplanation();
-        updateGraphInfo();
+        graphSearch();
     } else {
         alert('Please select start and target nodes');
     }
@@ -281,13 +285,11 @@ graphAstarButton.addEventListener("click", () => {
 graphDfsButton.addEventListener("click", () => {
 
     if (!GRAPH_IS_SELECTING_START && !GRAPH_IS_SELECTING_FINISH) {
-        GRAPH_CURRENT_ALGORITHM = graphDfs;
+        GRAPH_CURRENT_ALGORITHM = "dfs"
         if(GRAPH_IS_VISUALISED) {
             fsReset();
         }
-        GRAPH_CURRENT_ALGORITHM();
-        updateGraphExplanation();
-        updateGraphInfo();
+        graphSearch();
     } else {
         alert('Please select start and target nodes');
     }
@@ -295,13 +297,11 @@ graphDfsButton.addEventListener("click", () => {
 
 graphBfsButton.addEventListener("click", () => {
     if (!GRAPH_IS_SELECTING_START && !GRAPH_IS_SELECTING_FINISH) {
-        GRAPH_CURRENT_ALGORITHM = graphBfs;
+        GRAPH_CURRENT_ALGORITHM = "bfs";
         if(GRAPH_IS_VISUALISED) {
             fsReset()
         }
-        GRAPH_CURRENT_ALGORITHM();
-        updateGraphExplanation();
-        updateGraphInfo();
+        graphSearch();
     } else {
         alert('Please select start and target nodes');
     }
@@ -310,13 +310,6 @@ graphBfsButton.addEventListener("click", () => {
 graphResetButton.addEventListener("click", () => {
     graphReset()
 });
-
-/*
-westminsterButton.addEventListener("click", () => {
-    fullReset();
-    mapWestminster();
-});
-*/
 
 function fsReset() {
     GRAPH_VISITED_ARRAY = [];
@@ -382,6 +375,7 @@ function graphResetForRevisualisation() {
             GRAPH_ADJACENCY_LIST.adjacencyList[i].vertex.node.object.reset();
         }
     };
+    GRAPH_ADJACENCY_LIST.adjacencyList[GRAPH_FINISH_NODE_INDEX].vertex.node.object.isVisited = false;
     GRAPH_VISITED_COUNTER = 0;
     GRAPH_ALGORITHM_TIMER = 0;
     updateGraphInfo();
@@ -410,7 +404,6 @@ function getRandomArbitrary(min, max) {
 function animate() {
     context.clearRect(0, 0, RIGHT_BOUNDS, BOTTOM_BOUNDS);
     requestAnimationFrame(animate);
-    updateGraphExplanation();
 
     if (RENDER_IMAGE_SRC != undefined) {
         var img = new Image();
@@ -459,6 +452,7 @@ function graphDijkstra() {
         //If we are surrounded/ there is no path for us to take, return the computed path as there is no path possible
         if(closestNode.key === Infinity) {
             GRAPH_ALGORITHM_TIMER = Date.now() - startTime;
+            updateGraphInfo();
             visualiseGraphDijkstra();
             return GRAPH_VISITED_ARRAY;
         } 
@@ -564,6 +558,31 @@ function greaterThan(lhs, rhs) {
     }
 }
 
+function graphSearch() {
+    if(GRAPH_IS_VISUALISING) {
+        return
+    }
+    switch (GRAPH_CURRENT_ALGORITHM) {
+        case "dfs":
+            GRAPH_QUEUE = new Stack();
+            graphFirstSearch();
+        case "bfs":
+            GRAPH_QUEUE = new Queue();
+            graphFirstSearch();
+            break;
+        case "dijkstra":
+            GRAPH_CURRENT_SORT_CRITERIA = graphLessThan;
+            graphDijkstra();
+            break;
+        case "astar": 
+            GRAPH_CURRENT_SORT_CRITERIA = graphLessThanWithHeuristic;
+            graphDijkstra();
+            break;
+    }
+    updateGraphExplanation();
+    updateGraphInfo();
+}
+
 function graphAnimateShortestPath() {
     updateNodesInShortestPathOrder();
     if(GRAPH_IS_VISUALISED) {
@@ -573,6 +592,7 @@ function graphAnimateShortestPath() {
 
             GRAPH_ADJACENCY_LIST.adjacencyList[index].vertex.node.object.isShortestPath = true;
         }
+        GRAPH_IS_VISUALISING = false;
     } else {
         for(let i = 0; i < GRAPH_NODES_IN_SHORTEST_PATH_ORDER.length; i++) {
             setTimeout(() => {

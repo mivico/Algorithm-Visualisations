@@ -8,7 +8,7 @@ async function bubbleSort() {
       // is greater than the next iteration
       BAR_ARRAY[j].object.isBeingCompared = true;
       BAR_ARRAY[j+1].object.isBeingCompared = true;
-      await sleep(2);
+      await sleep(1);
       if(BAR_ARRAY[j].key > BAR_ARRAY[j+1].key){
           
         // If the condition is true then swap them

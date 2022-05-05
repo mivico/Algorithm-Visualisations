@@ -121,9 +121,10 @@ class BinaryHeap {
 
             this.shiftDown(first, endIndex);
         };
-        this.decreaseKey = (index, newKey) => {
+        this.decreaseKey = (node, newKey) => {
+            const index = this.index(node);
             this.nodes[index].key = newKey;
-            this.shiftUp(this.index);
+            this.shiftUp(index);
         }
 
         this.init = () => {

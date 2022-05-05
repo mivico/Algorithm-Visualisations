@@ -8,14 +8,28 @@ var DRAW_HEIGHT= 0.1;
 var WIDTH_COUNTER = 0.8;
 var DEPTH_ARRAY = [];
 var OFFSET_ARRAY = [];
-var OBJECT_MANAGER = new ObjectManager();
-var SPLAY_TREE = new SplayTree(null, OBJECT_MANAGER);
+var SPLAY_TREE = null;
+const ANIMATION_SPEED = 20;
+
+var FRAME_NUMBER = 0;
+
+var MIN_HEIGHT = 0.2;
+var MAX_HEIGHT = 0.8;
+
+var MIN_WIDTH = 0.1;
+var MAX_WIDTH = 0.9;
+
+var SIBLING_MAX_WIDTH = 0.2;
 
 //Buttons
 const initialiseButton = document.getElementById("initialise");
 const buildButton = document.getElementById("build");
 const deleteButton = document.getElementById("delete");
 const insertButton = document.getElementById("insert");
+
+
+let path1 = [];
+let path2 = [];
 
 
 function handleMouseDown(coordinate) {
@@ -216,11 +230,10 @@ function createVertexAt(xProp, yProp, tree) {
     tempNode.object.draw();
     tempNode.index = TREE_ADJACENCY_LIST.createVertex(tempNode).index;
     tree.index = tempNode.index;
-    //console.log(TREE_ADJACENCY_LIST.adjacencyList);
 }
 
 function handleMouseClick(e) {
-    createVertexFromClick()
+    //createVertexFromClick()
     console.log(TREE_ADJACENCY_LIST.adjacencyList)
 }
 
@@ -270,20 +283,6 @@ function handleEdgeCreation() {
     }
 }
 
-function createVertexFromClick() {
-    OBJECT_MANAGER.addNode(20, MOUSE_X/canvas.width, MOUSE_Y/canvas.height);
-    /*
-    const tempCircle = new Circle(MOUSE_X/canvas.width, MOUSE_Y/canvas.height);
-    const tempNode = {
-        tree: new TreeNode("foo"), 
-        object: tempCircle
-    };
-    
-    tempNode.object.draw();
-    tempNode.index = TREE_ADJACENCY_LIST.createVertex(tempNode).index;
-    */
-}
-
 function createEdge(index1, index2) {
     const tempEdge = new Line(TREE_ADJACENCY_LIST.adjacencyList[index1].vertex.node, TREE_ADJACENCY_LIST.adjacencyList[index2].vertex.node, 1);
     tempEdge.draw()
@@ -291,10 +290,8 @@ function createEdge(index1, index2) {
 }
 
 function animate() {
+    FRAME_NUMBER++;
     context.clearRect(0, 0, RIGHT_BOUNDS, BOTTOM_BOUNDS);
-    OBJECT_MANAGER.draw();
-    requestAnimationFrame(animate);
-    /*
     requestAnimationFrame(animate);
 
     for(let i = 0; i < TREE_ADJACENCY_LIST.adjacencyList.length; i++) {
@@ -318,7 +315,6 @@ function animate() {
     for (let i = 0; i < TREE_ADJACENCY_LIST.triangles.length; i++) {
         TREE_ADJACENCY_LIST.triangles[i].update();
     }
-    */
 }
 
 function updateDrawWidth() {
@@ -388,80 +384,6 @@ function drawTree(tree) {
     addmods(tree);
 }
 
-function setupTree(tree, depth = 0, height = 0.1) {
-    if (tree.leftChild) {
-        setupTree(tree.leftChild, depth + 1, height + DRAW_HEIGHT);
-    }
-
-    if (tree.rightChild) {
-        setupTree(tree.rightChild, depth + 1, height + DRAW_HEIGHT);
-    }
-
-    var place = 0.1;
-    const drawingY = height;
-    var drawingX = 0.1;
-  
-    if (!tree.leftChild && !tree.rightChild) {
-      place = DEPTH_ARRAY[depth];
-
-
-      console.log(`${tree.value} has no children`)
-      console.log(`drawing ${tree.value} at ${place}`)
-    } else if (tree.leftChild && tree.rightChild) {
-        s = getAdjacencyListRepresentation(tree.leftChild).originalx + getAdjacencyListRepresentation(tree.rightChild).originalx;
-        place = s / 2;
-
-
-        console.log(`${tree.value} has 2 children`)
-        console.log(`drawing ${tree.value} at ${place}`)
-    } else if (tree.leftChild) {
-        place = getAdjacencyListRepresentation(tree.leftChild).originalx + DRAW_WIDTH;
-
-
-        console.log(`${tree.value} has a left child`);
-        console.log(`got left child ${tree.leftChild.value} x value of ${getAdjacencyListRepresentation(tree.leftChild).originalx}`);
-        console.log(`drawing ${tree.value} at ${place}`)
-    } else if (tree.rightChild) {
-        //console.log(`right child of ${tree.rightChild.value} is ${getAdjacencyListRepresentation(tree.rightChild)}`)
-        place = getAdjacencyListRepresentation(tree.rightChild).originalx - DRAW_WIDTH;
-
-
-        console.log(`${tree.value} has a right child`);
-        console.log(`got right child ${tree.rightChild.value} x value of ${getAdjacencyListRepresentation(tree.rightChild).originalx}`);
-        console.log(`drawing ${tree.value} at ${place}`)
-    }
-
-    OFFSET_ARRAY[depth] = Math.max(OFFSET_ARRAY[depth], DEPTH_ARRAY[depth] - place);
-    console.log(OFFSET_ARRAY[depth])
-
-    if (tree.leftChild || tree.rightChild) {
-        place += OFFSET_ARRAY[depth];
-    }
-    
-    DEPTH_ARRAY[depth] += 2*DRAW_WIDTH
-    tree.mod = OFFSET_ARRAY[depth];
-
-    drawingX = place;
-    createVertexAt(drawingX, drawingY, tree);
-}
-
-
-function addmods(tree, modsum = 0) {
-    const rep = getAdjacencyListRepresentation(tree);
-    console.log(rep)
-    console.log(modsum)
-    rep.originalx += modsum;
-    modsum += tree.mod;
-  
-    if (tree.leftChild) {
-        addmods(tree.leftChild, modsum)
-    }
-
-    if (tree.rightChild) {
-        addmods(tree.rightChild, modsum)
-    }
-  }
-
 function drawEdges(tree) {
     if(tree.leftChild) {
         drawEdges(tree.leftChild)
@@ -512,109 +434,177 @@ function shiftChildren(tree) {
     }
 }
 
+function maxForDepth(tree, searchingDepth, depth = 0) {
+    if (depth === searchingDepth) {
+        return 1
+    }
+    if (tree.leftChild && tree.rightChild) {
+        return maxForDepth(tree.leftChild, searchingDepth, depth + 1) + maxForDepth(tree.rightChild, searchingDepth, depth + 1) 
+    } else if (tree.leftChild) {
+        return maxForDepth(tree.leftChild, searchingDepth, depth + 1)
+    } else if (tree.rightChild) {
+        return maxForDepth(tree.rightChild, searchingDepth, depth + 1)
+    }
+    return 0;
+}
+
+// Finds the path from root node to given root of the tree.
+function findLCA(n1, n2) {
+    path1 = [];
+    path2 = [];
+    return findLCAInternal(SPLAY_TREE, n1, n2);
+}
+
+function findLCAInternal(tree, n1, n2) {
+  
+    if (!findPath(tree, n1, path1) || !findPath(tree, n2, path2)) {
+        console.log((path1.length > 0) ? "n1 is present" : "n1 is missing");
+        console.log((path2.length > 0) ? "n2 is present" : "n2 is missing");
+        return -1;
+    }
+
+    let i;
+    for (i = 0; i < path1.length && i < path2.length; i++) {
+          
+    // System.out.println(path1.get(i) + " " + path2.get(i));
+        if (path1[i] != path2[i]) {
+            break;
+        }
+    }
+
+    return path1[i-1];
+}
+
+function findPath(node, n, path) {
+        // base case
+        if (node == null) {
+            return false;
+        }
+          
+        // Store this node . The node will be removed if
+        // not in path from node to n.
+        path.push(node);
+  
+        if (node == n) {
+            return true;
+        }
+  
+        if (node.leftChild != null && findPath(node.leftChild, n, path)) {
+            return true;
+        }
+  
+        if (node.rightChild != null && findPath(node.rightChild, n, path)) {
+            return true;
+        }
+  
+        // If not present in subtree rooted with node,
+        // remove node from
+        // path[] and return false
+        path.pop();
+  
+        return false;
+    }
+
+function reshuffleXCoords(node) {
+    const depth = getDepth(node);
+    const nodesInLevel = maxForDepth(depth);
+    if (depth === 0 && nodesInLevel === 0 && (maxDepth(SPLAY_TREE) - 1) === 0) {
+        moveNodeX(node, 0.5)
+    } else {
+        if(node.parent) {
+            const parentX = TREE_ADJACENCY_LIST.adjacencyList[node.parent.index].vertex.node.object.originalx;
+            const distanceFromParent = DRAW_WIDTH;
+            const newX = node.isLeftChild() ? parentX - distanceFromParent : parentX + distanceFromParent;
+            moveNodeX(node, newX);
+            if (isLeftOfRoot(node) && newX >= 0.5) {
+                moveTree(SPLAY_TREE.leftChild, -DRAW_WIDTH, 0)
+            } else if(!isLeftOfRoot(node) && newX <= 0.5) {
+                moveTree(SPLAY_TREE.rightChild, DRAW_WIDTH, 0)
+            }
+
+
+            const clash = isClash(node);
+            if(clash) {
+                console.log(`clash detetcted`)
+                //console.log(clash)
+                const lca = findLCA(node, clash);
+                //console.log(`lca of ${clash.value} and ${node.value} is ${lca.value}`)
+                if (isLeftOfRoot(node)) {
+                    moveTree(lca.leftChild, -DRAW_WIDTH - NODE_RADIUS/canvas.width, 0)
+                } else {
+                    moveTree(lca.rightChild, DRAW_WIDTH + NODE_RADIUS/canvas.width, 0)
+                }
+            }
+
+        }
+
+        if (node.leftChild) {
+            reshuffleXCoords(node.leftChild)
+        }
+        if (node.rightChild) {
+            reshuffleXCoords(node.rightChild)
+        }
+    }
+}
+
+function reshuffleYCoords(node) {
+    const depth = getDepth(node);
+    const maxD = maxDepth(SPLAY_TREE) - 1;
+    if (depth == 0 && maxD == 0) {
+        moveNodeY(node, 0.5);
+    } else {
+        const space = (MAX_HEIGHT - MIN_HEIGHT)/maxD;
+        moveNodeY(node, MIN_HEIGHT + (depth)*space);
+
+
+        if (node.leftChild) {
+            reshuffleYCoords(node.leftChild)
+        }
+        if (node.rightChild) {
+            reshuffleYCoords(node.rightChild)
+        }
+    }
+}
+
+function reshuffle(node) {
+    reshuffleYCoords(node);
+    reshuffleXCoords(node);
+}
+
 function insert() {
-    SPLAY_TREE.insertElement(24);
-    /*
+    
+    
     var tempTree = new TreeNode(getRndInteger(1, 100));
     if (SPLAY_TREE == null) {
         SPLAY_TREE = tempTree;
-        createVertexAt(0.5, 0.2, SPLAY_TREE)
+        createVertexAt(0.5, 0.2, SPLAY_TREE);
     } else {
         const position = findRightPosition(tempTree);
-
         const rep = getAdjacencyListRepresentation(position.node);
 
         if (position.child == "left") {
             position.node.setLeftChild(tempTree);
-            createVertexAt(rep.originalx - DRAW_WIDTH, rep.originaly + DRAW_HEIGHT, tempTree);
+            createVertexAt(rep.originalx, rep.originaly, tempTree);
         } else {
             position.node.setRightChild(tempTree);
-            createVertexAt(rep.originalx + DRAW_WIDTH, rep.originaly + DRAW_HEIGHT, tempTree);
+            createVertexAt(rep.originalx, rep.originaly, tempTree);
         }
     }
+    reshuffle(SPLAY_TREE)
     drawEdges(tempTree);
-
-    resolveClash(tempTree)
-    */
 }
 
-function resolveClash(tree) {
-    const clash = isClash(tree);
-    if (clash) {
-        //We have a clash
-        console.log(`we have a clash with ${clash.value}`)
-
-        //Firstly, we find if the tree is on the left or the right. This way, we know whether to move it to the left or right
-        var dir = 1;
-        if (isLeftOfRoot(tree)) {
-            dir = -1;
-        }
-
-        if (clash === SPLAY_TREE) {
-            //Clashing with root. Move new node
-            moveTree(dir === 1 ? SPLAY_TREE.rightChild : SPLAY_TREE.leftChild, dir*DRAW_WIDTH, 0);
-        } else {
-            //Clash with a normal subtree
-
-            //We need to see if the new node is to the left or right of the node it is clshing with
-            var clashRelation = 1;
-            if (tree.value <= clash.value) {
-                clashRelation = -1;
-            }
-
-            shiftNode(clash, dir*DRAW_WIDTH, 0);
-            moveTree(clashRelation === -1 ? clash.rightChild : clash.leftChild, dir*DRAW_WIDTH, 0);
-            var clashParent = clash;
-            while (clashParent != SPLAY_TREE) {
-                moveTree(clashRelation === -1 ? clash.rightChild : clash.leftChild, dir*DRAW_WIDTH, 0);
-                ensureBinaryProperty(clashParent);
-                clashParent = clashParent.parent;
-            }
-        }
-
-        const parent = tree.parent;
-        if (parent && parent != SPLAY_TREE) {
-            resolveClash(parent)
-        }
-    }
-}
-
-function ensureBinaryProperty(tree) {
-    const rep = getAdjacencyListRepresentation(tree);
-    if(!rep) {
-        return
-    }
-
-    if (tree.leftChild) {
-        const leftRep = getAdjacencyListRepresentation(tree.leftChild);
-        if (leftRep.originalx > rep.originalx) {
-            const temp = leftRep.originalx;
-            leftRep.originalx = rep.originalx;
-            rep.originalx = temp;
-        } else if (Math.abs(leftRep.originalx - rep.originalx) < 0.001) {
-            moveTree(tree.leftRep, -DRAW_WIDTH, 0);
-        }
-    }
-
-    if (tree.rightChild) {
-        const rightRep = getAdjacencyListRepresentation(tree.leftChild);
-        if (rightRep.originalx < rep.originalx) {
-            const temp = rightRep.originalx;
-            rightRep.originalx = rep.originalx;
-            rep.originalx = temp;
-        } else if (Math.abs(rightRep.originalx - rep.originalx) < 0.001) {
-            moveTree(tree.rightChild, DRAW_WIDTH, 0);
-        }
-    }
-}
 
 function moveTree(tree, xAmount, yAmount) {
     const rep = getAdjacencyListRepresentation(tree);
     if(!rep) {
         return
     }
-    rep.originalx += xAmount;
-    rep.originaly += yAmount;
+
+    moveNodeX(tree, xOfInterest(rep) + xAmount)
+    moveNodeY(tree, yOfInterest(rep) + yAmount)
+    //rep.originalx += xAmount;
+    //rep.originaly += yAmount;
 
     if (tree.leftChild) {
         moveTree(tree.leftChild, xAmount, yAmount)
@@ -631,38 +621,79 @@ function isLeftOfRoot(tree) {
     }
 }
 
+function xOfInterest(node) {
+    const animatingX = node.animationNewX;
+    if (animatingX) {
+        return animatingX
+    } else {
+        return node.originalx
+    }
+}
+
+function yOfInterest(node) {
+    const animatingY = node.animationNewY;
+    if (animatingY) {
+        return animatingY
+    } else {
+        return node.originaly
+    }
+}
+
 function isClash(tree) {
     const rep = getAdjacencyListRepresentation(tree);
     for (let i = 0; i < TREE_ADJACENCY_LIST.adjacencyList.length; i++) {
         const edgeList = TREE_ADJACENCY_LIST.adjacencyList[i];
         const edgeListTree = edgeList.vertex.node.tree;
         const circle = edgeList.vertex.node.object;
-        /*
-        if (tree != edgeListTree && rep.originalx == circle.originalx && rep.originaly == circle.originaly) {
-            return true
+        if (tree != edgeListTree && (Math.abs(xOfInterest(rep) - xOfInterest(circle)) < NODE_RADIUS/canvas.width) && (Math.abs(yOfInterest(rep) - yOfInterest(circle)) < NODE_RADIUS/canvas.width)) {
+            //console.log("clash detected");
+            //console.log(rep)
+            //console.log(circle)
+            return edgeListTree
         }
-        */
+       /*
         if (tree != edgeListTree && Math.abs(rep.originalx - circle.originalx) < 0.0001) {
             return edgeListTree
         }
+        */
         
     }
     return false
 }
 
-function shiftNode(tree, xAmount, yAmount) {
+function splay() {
+
+}
+
+
+
+
+
+
+
+function moveNodeX(tree, newX, frames = ANIMATION_SPEED) {
     const rep = getAdjacencyListRepresentation(tree);
-    rep.originalx += xAmount;
-    rep.originaly += yAmount;
+    rep.moveX(newX, frames);
+    //rep.originalx = newX;
+    
+}
+
+function moveNodeY(tree, newY, frames = ANIMATION_SPEED) {
+    const rep = getAdjacencyListRepresentation(tree);
+    rep.moveY(newY, frames);
+    //rep.originaly = newY;
 }
 
 function moveNode(tree, newX, newY) {
+    //moveNodeX(tree, newX);
+    //moveNodeY(tree, newY);
+    //console.log(`moving ${tree.value} to ${newX}, ${newY}`);
     const rep = getAdjacencyListRepresentation(tree);
-    console.log(`moving ${tree.value} to ${newX}, ${newY}`);
     rep.originalx = newX;
     rep.originaly = newY;
 }
 
+/*
 function reshuffle() {
     if (SPLAY_TREE.leftChild) {
         var tree = SPLAY_TREE.leftChild;
@@ -694,6 +725,8 @@ function reshuffle() {
         }
     }
 }
+*/
+
 
 function total(tree) {
     if (!tree.leftChild && !tree.rightChild) {

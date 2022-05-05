@@ -6,18 +6,14 @@ function gridfirstSearch() {
     //Just as in dijkstra's algorithm, we first set the start node to a distane of 0.
     GRID_NODES[START_NODE_INDEX].node.key = 0;
 
-    //Initialise the queue
-    const queueStart = Date.now();
-
-    //Assign what kind of queue we are going to use
     GRID_QUEUE.enqueue(GRID_NODES[START_NODE_INDEX].node);
     
-    QUEUE_TIMER = Date.now() - queueStart;
-
     //We loop as long as we have unvisited nodes
     let itr = 0;
+    let closestIndex = 0;
     while(GRID_QUEUE.length() > 0) {
         let closestNode = GRID_QUEUE.dequeue();
+        closestIndex = closestNode.object.coordinate;
         gridAddNeighboursToQueue(closestNode);
         updateUnvisitedNeighbours(closestNode);
         if(IS_VISUALISED) {
@@ -52,6 +48,7 @@ function gridfirstSearch() {
         itr++;
     }
     IS_VISUALISING = false;
+    IS_VISUALISED = true;
     return VISITED_ARRAY;
 }
 
@@ -66,3 +63,4 @@ function gridAddNeighboursToQueue(node) {
         }
     }
 }
+

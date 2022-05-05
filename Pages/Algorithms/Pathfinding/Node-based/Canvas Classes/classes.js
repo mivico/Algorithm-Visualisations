@@ -20,12 +20,26 @@ class Circle {
         this.dr = 1;
         this.accr = 1.01;
 
+        this.dx = 0;
+        this.dy = 0;
+
+        this.isAnimatingX = false;
+        this.isAnimatingY = false;
+        this.animationXStartFrame = null;
+        this.animationXEndFrame = null;
+        this.animationYStartFrame = null;
+        this.animationYEndFrame = null;
+        this.animationOldX = null;
+        this.animationOldY = null;
+        this.animationNewX = null;
+        this.animationNewY = null;
+
         this.draw = () => {
             context.beginPath();
             if(this.isFinish || this.isStart) {
                 context.arc(this.x, this.y, NODE_RADIUS*2, 0, Math.PI * 2, false);
             } else if(this.visualVisited) {
-                context.arc(this.x, this.y, NODE_RADIUS*1.5, 0, Math.PI * 2, false);
+                context.arc(this.x, this.y, NODE_RADIUS*1.2, 0, Math.PI * 2, false);
             } else {
                 context.arc(this.x, this.y, NODE_RADIUS, 0, Math.PI * 2, false);
             }
@@ -43,17 +57,20 @@ class Circle {
                 context.fillStyle = `rgba(255, 0, 255, 0.7)`;
                 context.fill();
             } else if(this.visualVisited) {
-                context.fillStyle = `rgba(0, 190, 218, 1)`;
+                context.fillStyle = `rgba(0, 0, 0, 1)`;
+                //context.fillStyle = `rgba(0, 190, 218, 1)`;
                 context.fill();
             } else if(this.isSelected) {
                 context.fillStyle = `rgba(${this.red}, 0, 0, 0.7)`;
                 context.fill();
             } 
-            /* else if (this.isQueued) {
-                context.fillStyle = `rgba(20, 200, 72, 0.7)`;
+            /*
+             else if (this.isQueued) {
+                context.fillStyle = `rgba(0, 0, 0, 0.7)`;
                 context.fill();
-            } 
-            */ else {
+            }  
+            */
+            else {
                 context.strokeStyle = `rgba(0, 0, 255, 0.7)`;
                 context.stroke();
             }
@@ -66,12 +83,67 @@ class Circle {
             }
 
 
-            this.x = this.originalx * canvas.width;
-            this.y = this.originaly * canvas.height;
             
             this.dr *= this.accr;
             this.red += this.dr;
+
+            if (this.isAnimatingX) {
+                this.originalx += this.dx;
+            }
+
+            if (this.isAnimatingY) {
+                this.originaly += this.dy;
+            }
+
+            this.x = this.originalx * canvas.width;
+            this.y = this.originaly * canvas.height;
+
+            if (FRAME_NUMBER >= this.animationXEndFrame && this.isAnimatingX) {
+                this.originalx = this.animationNewX;
+                this.dx = 0;
+                this.isAnimatingX = null;
+                this.animationXStartFrame = null;
+                this.animationXEndFrame = null;
+                this.animationOldX = null;
+                this.animationNewX = null;
+            }
+
+
+            if (FRAME_NUMBER >= this.animationYEndFrame && this.isAnimatingY) {
+                this.originaly = this.animationNewY;
+                this.dy = 0;
+                this.isAnimatingY = null;
+                this.animationYStartFrame = null;
+                this.animationYEndFrame = null;
+                this.animationOldY = null;
+                this.animationNewY = null;
+            }
+
+
             this.draw();
+        }
+
+
+        this.moveX = (newXProp, frames) => {
+            this.animationOldX = this.originalx;
+            this.animationNewX = newXProp;
+            this.animationXStartFrame = FRAME_NUMBER;
+            this.animationXEndFrame = frames + FRAME_NUMBER;
+
+            const xDistance = newXProp - this.originalx;
+            this.dx = xDistance/frames;
+            this.isAnimatingX = true;
+        }
+
+        this.moveY = (newYProp, frames) => {
+            this.animationOldY = this.originaly;
+            this.animationNewY = newYProp;
+            this.animationYStartFrame = FRAME_NUMBER;
+            this.animationYEndFrame = frames + FRAME_NUMBER;
+
+            const yDistance = newYProp - this.originaly;
+            this.dy = yDistance/frames;
+            this.isAnimatingY = true;
         }
 
         this.reset = () => {
@@ -102,15 +174,14 @@ class Line {
             var headlen = 5; // length of head in pixels
             var dx = this.x2 - this.x1;
             var dy = this.y2 - this.y1;
-            var angle = Math.atan2(dy, dx);
 
-            const myAngle = Math.PI/2 - Math.atan(dx/dy);
+            const angle = Math.PI/2 - Math.atan(dx/dy);
 
-            var compX1 = dy < 0 ? this.x1 - Math.cos(myAngle)*NODE_RADIUS : this.x1 + Math.cos(myAngle)*NODE_RADIUS;
-            var compX2 = dy < 0 ? this.x2 + Math.cos(myAngle)*NODE_RADIUS : this.x2 - Math.cos(myAngle)*NODE_RADIUS;
+            var compX1 = dy < 0 ? this.x1 - Math.cos(angle)*NODE_RADIUS : this.x1 + Math.cos(angle)*NODE_RADIUS;
+            var compX2 = dy < 0 ? this.x2 + Math.cos(angle)*NODE_RADIUS : this.x2 - Math.cos(angle)*NODE_RADIUS;
 
-            var compY1 = dy < 0 ? this.y1 - Math.sin(myAngle)*NODE_RADIUS : this.y1 + Math.sin(myAngle)*NODE_RADIUS;
-            var compY2 = dy < 0 ? this.y2 + Math.sin(myAngle)*NODE_RADIUS : this.y2 - Math.sin(myAngle)*NODE_RADIUS;
+            var compY1 = dy < 0 ? this.y1 - Math.sin(angle)*NODE_RADIUS : this.y1 + Math.sin(angle)*NODE_RADIUS;
+            var compY2 = dy < 0 ? this.y2 + Math.sin(angle)*NODE_RADIUS : this.y2 - Math.sin(angle)*NODE_RADIUS;
 
 
             //Line

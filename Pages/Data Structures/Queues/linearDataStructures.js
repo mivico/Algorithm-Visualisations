@@ -1,12 +1,12 @@
-class PriorityQueue {
+class LinearDataStructure {
     constructor() {
         this.array = [];
         this.enqueue = (element) => {
-            //Override
             this.array.push(element);
         }
         this.dequeue = () => {
             //Override
+            throw 'Function must be overridden';
         }
 
         this.length = () => {
@@ -15,7 +15,7 @@ class PriorityQueue {
     }
 }
 
-class Stack extends PriorityQueue {
+class Stack extends LinearDataStructure {
     constructor() {
         super();
         this.dequeue = () => {
@@ -24,7 +24,7 @@ class Stack extends PriorityQueue {
     }
 }
 
-class Queue extends PriorityQueue {
+class Queue extends LinearDataStructure {
     constructor() {
         super();
         this.dequeue = () => {
